@@ -1,4 +1,4 @@
-# Node-Identity
+# Node-Identity-DB
 
 Node-Identity-DB is a library to allow Node-Identity the ability to easily connect to any of the major database types, both SQL and Non-SQL. It uses mostly established and trusted libraries for each of the database types, such as Mongoose, Mysql, and PG and others, but it will have some unique tricks of it's own when used separately from Node-Identity. Imagine relational functionality with MongoDB and with the very same app, using the same models to work with SqlServer, or Mysql. I'm sure you can imagine how useful such could be for a lot of applications.
 
