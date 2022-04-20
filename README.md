@@ -4,7 +4,7 @@ Node-Identity-DB is a library to allow Node-Identity the ability to easily conne
 
 ## Purpose
 
-There are probably database tools similar to this out in the wild, but I figured I could, not reinvent the wheel, but create a tool that can work with any application, with any database, to allow for Node-Identity to be used easily, while providing a usefulness for many other things.
+There are probably database tools similar to this out in the wild, but I figured I could, not reinvent the wheel, but create a tool that can work with any application, with any database, to allow for Node-Identity to be used easily, while providing a usefulness for many other things. One Model, Many Database's.
 
 ### Contribution
 
