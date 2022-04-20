@@ -1,0 +1,37 @@
+{
+  "name": "node-identity-db",
+  "version": "0.0.1",
+  "description": "A library for any DB connection, for Node-Identity, for the world.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JEMasonMedia/Node-Identity-DB.git"
+  },
+  "keywords": [
+    "Node",
+    "Identity",
+    "DB",
+    "Database",
+    "Mongo",
+    "Mysql",
+    "Postgres",
+    "Sqlserver"
+  ],
+  "author": "JEMasonMedia",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JEMasonMedia/Node-Identity-DB/issues"
+  },
+  "homepage": "https://github.com/JEMasonMedia/Node-Identity-DB#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "moment": "^2.29.3",
+    "morgan": "^1.10.0"
+  }
+}
