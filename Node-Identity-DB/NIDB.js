@@ -73,31 +73,33 @@ const NIDB = class {
 
   static createStore = (config) => {}
 
-  static closeConnections = async (dbs, callBack) => {
+  static closeConnections = (dbs, callBack) => {
     let list = []
     let errors = []
 
-    if (!dbs) dbs = Object.keys(this.databaseConnections)
+    try {
+      if (!dbs) dbs = Object.keys(this.databaseConnections)
 
-    dbs.map(async (dbConnID) => {
-      const result = await dbManager.closeConnections(
-        this.databaseConnections[dbConnID].databaseType,
-        this.databaseConnections[dbConnID]
-      )
+      dbs.map(async (dbConnID) => {
+        const result = dbManager.closeConnections(
+          this.databaseConnections[dbConnID].databaseType,
+          this.databaseConnections[dbConnID]
+        )
 
-      if (result.err) {
-        errors.push({ dbConnID, err: result.err })
-      } else {
-        list.push(dbConnID)
-        console.log(list)
-        delete this.databaseConnections[dbConnID]
-      }
-    })
+        if (result.err) {
+          errors.push({ dbConnID, err: result.err })
+        } else {
+          list.push(dbConnID)
+          // console.log('close if', list)
+          delete this.databaseConnections[dbConnID]
+        }
+      })
+    } finally {
+      // console.log('after map', list)
 
-    console.log(list)
-
-    if (errors.length > 0) callBack(errors, list)
-    else callBack(null, list)
+      if (errors.length > 0) callBack(errors, list)
+      else callBack(null, list)
+    }
   }
 }
 

@@ -1,8 +1,8 @@
-import manageMongo from './supportedDBs/Mongo.js'
+import MongoDBManager from './supportedDBs/MongoDBManager.js'
 
 const supportedDBs = {}
 
-supportedDBs['MongoDB'] = { manageMongo }
+supportedDBs['MongoDB'] = { manager: MongoDBManager }
 
 const dbManager = {
   connectDB: async (databaseType, connectionConfig, additionalConfig) => {
@@ -14,7 +14,7 @@ const dbManager = {
     if (databaseType) {
       try {
         if (supportedDBs[databaseType]) {
-          return await supportedDBs[databaseType].manageMongo.connectMongo(
+          return await supportedDBs[databaseType].manager.connectDB(
             connectionConfig,
             additionalConfig
           )
@@ -37,9 +37,7 @@ const dbManager = {
     if (databaseType) {
       try {
         if (supportedDBs[databaseType]) {
-          return await supportedDBs[databaseType].manageMongo.disconnectMongo(
-            dbConn
-          )
+          return await supportedDBs[databaseType].manager.disconnectDB(dbConn)
         } else {
           return { err: 'Unsupported database type' }
         }

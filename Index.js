@@ -28,13 +28,35 @@ DBconnections['users'] = {
     }
   ),
 }
+
+DBconnections['items'] = {
+  dbid: await NIDB.useDatabase(
+    'MongoDB',
+    {
+      mongoURI: process.env.MONGO_URI,
+    },
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    },
+    (err, dbConn) => {
+      if (!err && dbConn) {
+        console.log(
+          `MongoDB '${dbConn.DBconnID}' connected on host '${dbConn.connection.host}' successfully!`
+        )
+      } else {
+        console.log(err)
+      }
+    }
+  ),
+}
 // DBconnections['items'] = { dbid: NIDB.useDatabase('mysql', 'mysql') }
 // DBconnections['cart'] = { dbid: NIDB.useDatabase('mssql', 'mssql') }
 // DBconnections['data'] = { dbid: NIDB.useDatabase('postgres', 'postgres') }
 
 // console.log(NIDB.databaseConnections)
 
-await NIDB.closeConnections(null, (err, dbConnIDlist) => {
+NIDB.closeConnections(null, (err, dbConnIDlist) => {
   if (!err && dbConnIDlist) {
     console.log(`Database connections closed!`, dbConnIDlist)
   } else {
@@ -42,4 +64,4 @@ await NIDB.closeConnections(null, (err, dbConnIDlist) => {
   }
 })
 
-// console.log(NIDB.databaseConnections)
+console.log(NIDB.databaseConnections)

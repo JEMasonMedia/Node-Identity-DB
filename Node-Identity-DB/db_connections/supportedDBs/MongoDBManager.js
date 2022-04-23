@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
-const manageMongo = {
-  connectMongo: async (connectionConfig, additionalConfig) => {
+const MongoDBManager = {
+  connectDB: async (connectionConfig, additionalConfig) => {
     try {
       const conn = await mongoose.connect(
         connectionConfig?.mongoURI,
@@ -12,7 +12,7 @@ const manageMongo = {
       return { err }
     }
   },
-  disconnectMongo: async (dbConn) => {
+  disconnectDB: async (dbConn) => {
     try {
       let str = dbConn.DBconnID
       await dbConn.connection.close()
@@ -23,4 +23,4 @@ const manageMongo = {
   },
 }
 
-export default manageMongo
+export default MongoDBManager
