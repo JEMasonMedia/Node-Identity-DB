@@ -90,13 +90,12 @@ const NIDB = class {
           errors.push({ dbConnID, err: result.err })
         } else {
           list.push(dbConnID)
-          // console.log('close if', list)
           delete this.databaseConnections[dbConnID]
         }
       })
+    } catch (err) {
+      callBack(err)
     } finally {
-      // console.log('after map', list)
-
       if (errors.length > 0) callBack(errors, list)
       else callBack(null, list)
     }

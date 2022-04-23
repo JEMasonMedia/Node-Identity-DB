@@ -9,9 +9,11 @@ let DBconnections = {}
 
 DBconnections['users'] = {
   dbid: await NIDB.useDatabase(
-    'MongoDB',
+    'MONGODB',
     {
-      mongoURI: process.env.MONGO_URI,
+      // mongoURI: process.env.MONGO_URI,
+      host: process.env.MONGO_HOST,
+      port: process.env.MONGO_PORT,
     },
     {
       useNewUrlParser: true,
@@ -20,7 +22,7 @@ DBconnections['users'] = {
     (err, dbConn) => {
       if (!err && dbConn) {
         console.log(
-          `MongoDB '${dbConn.DBconnID}' connected on host '${dbConn.connection.host}' successfully!`
+          `${dbConn.databaseType} '${dbConn.DBconnID}' connected on host '${dbConn.connectionConfig.host}' successfully!`
         )
       } else {
         console.log(err)
@@ -31,18 +33,19 @@ DBconnections['users'] = {
 
 DBconnections['items'] = {
   dbid: await NIDB.useDatabase(
-    'MongoDB',
+    'MYSQLDB',
     {
-      mongoURI: process.env.MONGO_URI,
+      host: process.env.MYSQL_HOST,
+      port: process.env.MYSQL_PORT,
+      user: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASSWORD,
+      database: process.env.MYSQL_DATABASE,
     },
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    },
+    {},
     (err, dbConn) => {
       if (!err && dbConn) {
         console.log(
-          `MongoDB '${dbConn.DBconnID}' connected on host '${dbConn.connection.host}' successfully!`
+          `${dbConn.databaseType} '${dbConn.DBconnID}' connected on host '${dbConn.connectionConfig.host}' successfully!`
         )
       } else {
         console.log(err)

@@ -1,12 +1,11 @@
 import mongoose from 'mongoose'
 
+//MONGO_URI=mongodb://127.0.0.1:27017
 const MongoDBManager = {
   connectDB: async (connectionConfig, additionalConfig) => {
     try {
-      const conn = await mongoose.connect(
-        connectionConfig?.mongoURI,
-        additionalConfig
-      )
+      const mongoURI = `mongodb://${connectionConfig.host}:${connectionConfig.port}`
+      const conn = await mongoose.connect(mongoURI, additionalConfig)
       return conn.connection
     } catch (err) {
       return { err }
