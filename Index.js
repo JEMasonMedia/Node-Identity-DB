@@ -1,70 +1,12 @@
-import dotenv from 'dotenv'
-
 import NIDB from './Node-Identity-DB/NIDB.js'
+import DBconnections from './DCconnections.js'
+import Models from './Models.js'
 
-// Load config
-dotenv.config()
+NIDB.useModel(DBconnections['users'].dbId, Models['users'])
+NIDB.useModel(DBconnections['items'].dbId, Models['items'])
 
-let DBconnections = {}
-
-DBconnections['users'] = {
-  dbid: await NIDB.useDatabase(
-    'users',
-    'MONGODB',
-    {
-      host: process.env.MONGO_HOST,
-      port: process.env.MONGO_PORT,
-      dbExtraConfig: {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      },
-    },
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      test: 'random string',
-    },
-    (err, dbConn) => {
-      if (!err && dbConn) {
-        console.log(
-          `${dbConn.databaseType} '${dbConn.DBconnID}' connected on host '${dbConn.connectionConfig.host}' successfully!`
-        )
-      } else {
-        console.log(err)
-      }
-    }
-  ),
-}
-
-DBconnections['items'] = {
-  dbid: await NIDB.useDatabase(
-    'items',
-    'MYSQLDB',
-    {
-      host: process.env.MYSQL_HOST,
-      port: process.env.MYSQL_PORT,
-      user: process.env.MYSQL_USER,
-      password: process.env.MYSQL_PASSWORD,
-      database: process.env.MYSQL_DATABASE,
-    },
-    {},
-    (err, dbConn) => {
-      if (!err && dbConn) {
-        // console.log(dbConn)
-        console.log(
-          `${dbConn.databaseType} '${dbConn.DBconnID}' connected on host '${dbConn.connectionConfig.host}' successfully!`
-        )
-      } else {
-        console.log(err)
-      }
-    }
-  ),
-}
-// DBconnections['items'] = { dbid: NIDB.useDatabase('mysql', 'mysql') }
-// DBconnections['cart'] = { dbid: NIDB.useDatabase('mssql', 'mssql') }
-// DBconnections['data'] = { dbid: NIDB.useDatabase('postgres', 'postgres') }
-
-// console.log(NIDB.databaseConnections)
+// const user = DBconnections['users'].select('*').where({ id: 1 }).first()
+// const item = DBconnections['items'].select('*').where({ id: 1 }).first()
 
 NIDB.closeConnections(null, (err, dbConnIDlist) => {
   if (!err && dbConnIDlist) {
