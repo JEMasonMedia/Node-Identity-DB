@@ -9,15 +9,20 @@ let DBconnections = {}
 
 DBconnections['users'] = {
   dbid: await NIDB.useDatabase(
+    'users',
     'MONGODB',
     {
-      // mongoURI: process.env.MONGO_URI,
       host: process.env.MONGO_HOST,
       port: process.env.MONGO_PORT,
+      dbExtraConfig: {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      },
     },
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      test: 'random string',
     },
     (err, dbConn) => {
       if (!err && dbConn) {
@@ -33,6 +38,7 @@ DBconnections['users'] = {
 
 DBconnections['items'] = {
   dbid: await NIDB.useDatabase(
+    'items',
     'MYSQLDB',
     {
       host: process.env.MYSQL_HOST,
@@ -44,6 +50,7 @@ DBconnections['items'] = {
     {},
     (err, dbConn) => {
       if (!err && dbConn) {
+        // console.log(dbConn)
         console.log(
           `${dbConn.databaseType} '${dbConn.DBconnID}' connected on host '${dbConn.connectionConfig.host}' successfully!`
         )

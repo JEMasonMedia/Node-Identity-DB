@@ -33,6 +33,7 @@ const NIDB = class {
   Models = {}
 
   static useDatabase = async (
+    connectionName,
     databaseType,
     connectionConfig,
     additionalConfig,
@@ -43,8 +44,10 @@ const NIDB = class {
       ...this.databaseConnections,
       [`${DBconnID}`]: {
         DBconnID,
+        connectionName,
         databaseType,
         connectionConfig,
+        additionalConfig,
         connection: null,
       },
     }

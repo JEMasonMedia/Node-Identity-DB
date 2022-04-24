@@ -5,7 +5,10 @@ const MongoDBManager = {
   connectDB: async (connectionConfig, additionalConfig) => {
     try {
       const mongoURI = `mongodb://${connectionConfig.host}:${connectionConfig.port}`
-      const conn = await mongoose.connect(mongoURI, additionalConfig)
+      const conn = await mongoose.connect(
+        mongoURI,
+        connectionConfig.dbExtraConfig
+      )
       return conn.connection
     } catch (err) {
       return { err }
