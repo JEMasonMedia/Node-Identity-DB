@@ -1,7 +1,7 @@
 import supportedDBs from '../supportedDBs/supportedDBs.js'
 
-const dbManager = {
-  connectDB: async (databaseType, connectionConfig, additionalConfig) => {
+const modelManager = {
+  createSchema: async (databaseType, connectionConfig, additionalConfig) => {
     databaseType =
       typeof databaseType == 'string' && databaseType !== ''
         ? databaseType
@@ -46,4 +46,4 @@ const dbManager = {
   },
 }
 
-export default dbManager
+export default modelManager

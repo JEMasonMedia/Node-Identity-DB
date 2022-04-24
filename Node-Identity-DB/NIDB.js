@@ -68,10 +68,8 @@ const NIDB = class {
     }
   }
 
-  static useModel = (model, additionalConfig) => {
-    // console.log(this.models)
-    this.models.push('321')
-    return this
+  static useModel = (dbConn, model, additionalConfig) => {
+    console.log(dbConn, model)
   }
 
   static createStore = (config) => {}
@@ -84,7 +82,7 @@ const NIDB = class {
       if (!dbs) dbs = Object.keys(this.databaseConnections)
 
       dbs.map(async (dbConnID) => {
-        const result = dbManager.closeConnections(
+        const result = dbManager.disconnectDB(
           this.databaseConnections[dbConnID].databaseType,
           this.databaseConnections[dbConnID]
         )

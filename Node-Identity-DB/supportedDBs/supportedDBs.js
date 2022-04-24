@@ -1,5 +1,5 @@
-import MongoDBManager from './supportedDBs/MongoDBManager.js'
-import MySql2DBManager from './supportedDBs/MySql2DBManager.js'
+import MongoDBManager from './Managers/MongoDBManager.js'
+import MySql2DBManager from './Managers/MySql2DBManager.js'
 
 const supportedDBs = {}
 

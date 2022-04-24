@@ -4,8 +4,6 @@ import knex from 'knex'
 const MySql2DBManager = {
   connectDB: async (connectionConfig, additionalConfig) => {
     try {
-      // const conn = await mysql.createConnection(connectionConfig)
-
       const conn = knex({
         client: 'mysql2',
         connectionConfig,
