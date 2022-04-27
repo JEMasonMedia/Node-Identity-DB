@@ -17,7 +17,7 @@ const dbManager = {
         } else {
           return { err: 'Unsupported database type' }
         }
-      } catch (err) {
+      } catch (error) {
         return { err: 'Error connecting to the DB', error }
       }
     } else {

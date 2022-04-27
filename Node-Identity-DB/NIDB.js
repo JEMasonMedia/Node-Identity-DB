@@ -25,51 +25,78 @@
  *    * Closes all or specified database connections
  */
 
-import helpers from './helpers/helpers.js'
+// import helpers from './helpers/helpers.js'
 import dbManager from './db_connections/dbManager.js'
+import modelManager from './model_conversions/modelManager.js'
 
 const NIDB = class {
   databaseConnections = {}
-  Models = {}
 
   static useDatabase = async (
     connectionName,
     databaseType,
     connectionConfig,
-    additionalConfig,
+    additionalConfig = {},
     callBack
   ) => {
-    let DBconnID = helpers.createComplexString([7, 12, 7])
-    this.databaseConnections = {
-      ...this.databaseConnections,
-      [`${DBconnID}`]: {
-        DBconnID,
-        connectionName,
+    if (connectionName && databaseType && connectionConfig && callBack) {
+      this.databaseConnections = {
+        ...this.databaseConnections,
+        [`${connectionName}`]: {
+          connectionName,
+          databaseType,
+          connectionConfig,
+          additionalConfig,
+          connection: null,
+          models: {},
+        },
+      }
+
+      const client = await dbManager.connectDB(
         databaseType,
         connectionConfig,
-        additionalConfig,
-        connection: null,
-      },
-    }
+        additionalConfig
+      )
 
-    const conn = await dbManager.connectDB(
-      databaseType,
-      connectionConfig,
-      additionalConfig
-    )
-
-    if (conn.err) {
-      delete this.databaseConnections[`${DBconnID}`]
-      callBack(conn.err)
+      if (client.err) {
+        delete this.databaseConnections[`${connectionName}`]
+        callBack(client)
+      } else {
+        this.databaseConnections[`${connectionName}`].connection = client
+        callBack(null, this.databaseConnections[`${connectionName}`])
+        return true
+      }
     } else {
-      this.databaseConnections[`${DBconnID}`].connection = conn
-      callBack(null, this.databaseConnections[`${DBconnID}`])
-      return DBconnID
+      return { err: 'Invalid arguments' }
     }
   }
 
-  static useModel = (dbConn, model, additionalConfig) => {
-    console.log(dbConn, model)
+  static useModel = (
+    connectionName,
+    modelName,
+    model,
+    additionalConfig = {}
+  ) => {
+    if (connectionName && modelName && model) {
+      modelManager.validateModel(model, (err, valid) => {
+        if (!err && valid) {
+          this.databaseConnections[`${connectionName}`].models[`${modelName}`] =
+            {
+              modelName,
+              connectionName,
+              model: new modelManager(model),
+              additionalConfig,
+            }
+          return true
+        } else {
+          {
+            err
+          }
+        }
+      })
+    } else {
+      return { err: 'Invalid arguments' }
+    }
   }
 
   static createStore = (config) => {}

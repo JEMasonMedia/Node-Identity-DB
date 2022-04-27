@@ -2,11 +2,14 @@ import NIDB from './Node-Identity-DB/NIDB.js'
 import DBconnections from './DCconnections.js'
 import Models from './Models.js'
 
-NIDB.useModel(DBconnections['users'].dbId, Models['users'])
-NIDB.useModel(DBconnections['items'].dbId, Models['items'])
+NIDB.useModel('users', 'users', Models['users'])
+// NIDB.useModel('items', 'items', Models['items'])
 
 // const user = DBconnections['users'].select('*').where({ id: 1 }).first()
 // const item = DBconnections['items'].select('*').where({ id: 1 }).first()
+
+console.log(NIDB.databaseConnections['users'].models['users'].model.getModel())
+// console.log(NIDB.databaseConnections['items'].models['items'])
 
 NIDB.closeConnections(null, (err, dbConnIDlist) => {
   if (!err && dbConnIDlist) {
@@ -16,4 +19,4 @@ NIDB.closeConnections(null, (err, dbConnIDlist) => {
   }
 })
 
-console.log(NIDB.databaseConnections)
+// console.log(NIDB.databaseConnections)

@@ -5,15 +5,15 @@ Models['users'] = {
     key: 'primary',
     type: 'int',
     increments: true,
-    required: true,
+    nullable: false,
   },
   name: {
     type: 'string',
-    required: true,
+    nullable: false,
   },
   cart: {
     type: 'array',
-    required: false,
+    nullable: true,
   },
 }
 
@@ -22,19 +22,19 @@ Models['items'] = {
     key: 'primary',
     type: 'int',
     increments: true,
-    required: true,
+    nullable: false,
   },
   name: {
     type: 'string',
-    required: true,
+    nullable: false,
   },
   description: {
     type: 'string',
-    required: false,
+    nullable: true,
   },
   quantity: {
     type: 'int',
-    required: true,
+    nullable: false,
   },
 }
 

@@ -1,6 +1,5 @@
-import mongoose from 'mongoose'
+import { MongoClient } from 'mongodb'
 
-//MONGO_URI=mongodb://127.0.0.1:27017
 const MongoDBManager = {
   connectDB: async (connectionConfig, additionalConfig) => {
     try {
@@ -22,11 +21,10 @@ const MongoDBManager = {
       else
         mongoURI = `mongodb+srv://${userPass}${connectionConfig.host}/${connectionConfig.database}?retryWrites=true&w=majority`
 
-      const conn = await mongoose.connect(
-        mongoURI,
-        connectionConfig.dbExtraConfig
-      )
-      return conn.connection
+      const client = new MongoClient(mongoURI)
+      await client.connect()
+
+      return client
     } catch (err) {
       return { err }
     }

@@ -2,12 +2,13 @@
 var helpers = {}
 
 // Create a string of random alphanumeric characters, of a given length
-helpers.createRandomString = (strLength) => {
+helpers.createRandomString = (extraConfuscation, strLength) => {
   strLength = typeof strLength == 'number' && strLength > 0 ? strLength : false
   if (strLength) {
-    // Define all the possible characters that could go into a string
+    // Define all the possible characters that could go into a string !@#$%^&*()=+
     let possibleCharacters =
-      'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()=+' +
+      'abcdefghijklmnopqrstuvwxyz0123456789' +
+      (extraConfuscation ? '!@#$%^&*()=+' : '') +
       'abcdefghijklmnopqrstuvwxyz'.toUpperCase()
 
     // Start the final string
@@ -31,7 +32,7 @@ helpers.createRandomString = (strLength) => {
 helpers.createComplexString = (segments) => {
   // Returns multipart hyphenated random string
   return String(
-    segments.map((segment) => helpers.createRandomString(segment))
+    segments.map((segment) => helpers.createRandomString(false, segment))
   ).replaceAll(',', '-')
 }
 

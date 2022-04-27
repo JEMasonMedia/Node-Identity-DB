@@ -24,7 +24,7 @@ DBconnections['users'] = {
     (err, dbConn) => {
       if (!err && dbConn) {
         console.log(
-          `${dbConn.databaseType} '${dbConn.DBconnID}' connected on host '${dbConn.connectionConfig.host}' successfully!`
+          `${dbConn.databaseType} '${dbConn.connectionName}' connected on host '${dbConn.connectionConfig.host}' successfully!`
         )
       } else {
         console.log(err)
@@ -33,29 +33,29 @@ DBconnections['users'] = {
   ),
 }
 
-DBconnections['items'] = {
-  dbId: await NIDB.useDatabase(
-    'items',
-    'MYSQLDB',
-    {
-      host: process.env.MYSQL_HOST,
-      port: process.env.MYSQL_PORT,
-      user: process.env.MYSQL_USER,
-      password: process.env.MYSQL_PASSWORD,
-      database: process.env.MYSQL_DATABASE,
-    },
-    {},
-    (err, dbConn) => {
-      if (!err && dbConn) {
-        console.log(
-          `${dbConn.databaseType} '${dbConn.DBconnID}' connected on host '${dbConn.connectionConfig.host}' successfully!`
-        )
-      } else {
-        console.log(err)
-      }
-    }
-  ),
-}
+// DBconnections['items'] = {
+//   dbId: await NIDB.useDatabase(
+//     'items',
+//     'MYSQLDB',
+//     {
+//       host: process.env.MYSQL_HOST,
+//       port: process.env.MYSQL_PORT,
+//       user: process.env.MYSQL_USER,
+//       password: process.env.MYSQL_PASSWORD,
+//       database: process.env.MYSQL_DATABASE,
+//     },
+//     {},
+//     (err, dbConn) => {
+//       if (!err && dbConn) {
+//         console.log(
+//           `${dbConn.databaseType} '${dbConn.connectionName}' connected on host '${dbConn.connectionConfig.host}' successfully!`
+//         )
+//       } else {
+//         console.log(err)
+//       }
+//     }
+//   ),
+// }
 // DBconnections['items'] = { dbid: NIDB.useDatabase('mysql', 'mysql') }
 // DBconnections['cart'] = { dbid: NIDB.useDatabase('mssql', 'mssql') }
 // DBconnections['data'] = { dbid: NIDB.useDatabase('postgres', 'postgres') }
