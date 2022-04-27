@@ -1,49 +1,81 @@
 import supportedDBs from '../supportedDBs/supportedDBs.js'
 
-const modelManager = {
-  createSchema: async (databaseType, connectionConfig, additionalConfig) => {
-    databaseType =
-      typeof databaseType == 'string' && databaseType !== ''
-        ? databaseType
-        : false
+const modelManager = class {
+  model = {}
 
-    if (databaseType) {
-      try {
-        if (supportedDBs[databaseType]) {
-          return await supportedDBs[databaseType].manager.connectDB(
-            connectionConfig,
-            additionalConfig
-          )
-        } else {
-          return { err: 'Unsupported database type' }
+  constructor(model) {
+    this.model = model
+  }
+
+  // C R U D
+  read = (data, callBack) => {}
+  create = (data, callBack) => {}
+  update = (data, callBack) => {}
+  delete = (data, callBack) => {}
+
+  // Validate the model
+  static validateModel = (model, callBack) => {
+    if (model && callBack) {
+      const modelKeys = Object.keys(model)
+      const modelKeysLength = modelKeys.length
+
+      if (modelKeysLength > 0) {
+        const modelKeysLength = modelKeys.length
+        let modelKeysIndex = 0
+
+        const validateModel = () => {
+          const modelKey = modelKeys[modelKeysIndex]
+          const modelKeyType = typeof model[modelKey]
+
+          if (modelKeyType === 'object') {
+            if (model[modelKey] !== null) {
+              const innerKeys = Object.keys(model[modelKey])
+              const innerKeysLength = innerKeys.length
+
+              for (let i; i < innerKeysLength; i++) {
+                const innerKey = innerKeys[i]
+                const innerKeyType = typeof model[modelKey][innerKey]
+                console.log(innerKeyType)
+                const innerKeyTypeValid = [
+                  'string',
+                  'number',
+                  'boolean',
+                  'array',
+                  'object',
+                ]
+
+                if (!innerKeyTypeValid.contains(innerKeyType)) {
+                  callBack(`Invalid type for ${innerKey}`, false)
+                  return false
+                }
+              }
+
+              modelKeysIndex++
+              if (modelKeysIndex < modelKeysLength) {
+                validateModel()
+              } else {
+                callBack(null, true)
+              }
+            } else {
+              callBack(`${modelKey} is empty`)
+            }
+          } else {
+            callBack(`${modelKey} is not a object`)
+          }
         }
-      } catch (err) {
-        return { err: 'Error connecting to the DB', error }
+
+        validateModel()
+      } else {
+        callBack('Model is empty')
       }
     } else {
-      return { err: 'Unsupported database type' }
+      callBack('Invalid arguments')
     }
-  },
-  disconnectDB: async (databaseType, dbConn) => {
-    databaseType =
-      typeof databaseType == 'string' && databaseType !== ''
-        ? databaseType
-        : false
+  }
 
-    if (databaseType) {
-      try {
-        if (supportedDBs[databaseType]) {
-          return await supportedDBs[databaseType].manager.disconnectDB(dbConn)
-        } else {
-          return { err: 'Unsupported database type' }
-        }
-      } catch (error) {
-        return { err: 'Error closing the connection', error }
-      }
-    } else {
-      return { err: 'Unsupported database type' }
-    }
-  },
+  getModel = () => {
+    return this.model
+  }
 }
 
 export default modelManager
