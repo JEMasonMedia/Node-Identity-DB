@@ -64,10 +64,9 @@ const NIDB = class {
       } else {
         this.databaseConnections[`${connectionName}`].connection = client
         callBack(null, this.databaseConnections[`${connectionName}`])
-        return true
       }
     } else {
-      return { err: 'Invalid arguments' }
+      callBack({ err: 'Invalid arguments' })
     }
   }
 
@@ -75,7 +74,8 @@ const NIDB = class {
     connectionName,
     modelName,
     model,
-    additionalConfig = {}
+    additionalConfig = {},
+    callBack
   ) => {
     if (connectionName && modelName && model) {
       modelManager.validateModel(model, (err, valid) => {
@@ -87,15 +87,12 @@ const NIDB = class {
               model: new modelManager(model),
               additionalConfig,
             }
-          return true
         } else {
-          {
-            err
-          }
+          callBack({ err })
         }
       })
     } else {
-      return { err: 'Invalid arguments' }
+      callBack({ err: 'Invalid arguments' })
     }
   }
 

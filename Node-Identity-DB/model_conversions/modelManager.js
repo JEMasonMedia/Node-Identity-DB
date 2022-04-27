@@ -8,8 +8,8 @@ const modelManager = class {
   }
 
   // C R U D
-  read = (data, callBack) => {}
   create = (data, callBack) => {}
+  read = (data, callBack) => {}
   update = (data, callBack) => {}
   delete = (data, callBack) => {}
 
@@ -35,7 +35,6 @@ const modelManager = class {
               for (let i; i < innerKeysLength; i++) {
                 const innerKey = innerKeys[i]
                 const innerKeyType = typeof model[modelKey][innerKey]
-                console.log(innerKeyType)
                 const innerKeyTypeValid = [
                   'string',
                   'number',
