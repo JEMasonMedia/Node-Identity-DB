@@ -3,10 +3,10 @@ import dotenv from 'dotenv'
 dotenv.config()
 import NIDB from './Node-Identity-DB/NIDB.js'
 
-await NIDB.useDatabase(
-  'users',
-  'MONGODB',
-  {
+await NIDB.useDatabase({
+  connectionName: 'users',
+  databaseType: 'MONGODB',
+  connectionConfig: {
     host: process.env.MONGO_HOST,
     port: process.env.MONGO_PORT,
     database: process.env.MONGO_DATABASE,
@@ -17,8 +17,8 @@ await NIDB.useDatabase(
       useUnifiedTopology: true,
     },
   },
-  {},
-  (err, dbConn) => {
+  additionalConfig: {},
+  callBack: (err, dbConn) => {
     if (!err && dbConn) {
       console.log(
         `The ${dbConn.databaseType} connection: '${dbConn.connectionName}', on host '${dbConn.connectionConfig.host}', has connected successfully!`
@@ -26,21 +26,21 @@ await NIDB.useDatabase(
     } else {
       console.log(err)
     }
-  }
-)
+  },
+})
 
-await NIDB.useDatabase(
-  'items',
-  'MYSQLDB',
-  {
+await NIDB.useDatabase({
+  connectionName: 'items',
+  databaseType: 'MYSQLDB',
+  connectionConfig: {
     host: process.env.MYSQL_HOST,
     port: process.env.MYSQL_PORT,
     user: process.env.MYSQL_USER,
     password: process.env.MYSQL_PASSWORD,
     database: process.env.MYSQL_DATABASE,
   },
-  {},
-  (err, dbConn) => {
+  additionalConfig: {},
+  callBack: (err, dbConn) => {
     if (!err && dbConn) {
       console.log(
         `The ${dbConn.databaseType} connection: '${dbConn.connectionName}', on host '${dbConn.connectionConfig.host}', has connected successfully!`
@@ -48,8 +48,8 @@ await NIDB.useDatabase(
     } else {
       console.log(err)
     }
-  }
-)
+  },
+})
 
 // DBconnections['items'] = { dbid: NIDB.useDatabase('mysql', 'mysql') }
 // DBconnections['cart'] = { dbid: NIDB.useDatabase('mssql', 'mssql') }

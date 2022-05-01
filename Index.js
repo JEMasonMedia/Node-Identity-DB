@@ -2,8 +2,24 @@ import NIDB from './Node-Identity-DB/NIDB.js'
 import './DCconnections.js'
 import Models from './Models.js'
 
-NIDB.useModel('users', 'users', Models['users'])
-NIDB.useModel('items', 'items', Models['items'])
+NIDB.useModel({
+  connectionName: 'users',
+  modelName: 'users',
+  model: Models['users'],
+  additionalConfig: {},
+  callBack: (err, model) => {
+    console.log(err)
+  },
+})
+NIDB.useModel({
+  connectionName: 'items',
+  modelName: 'items',
+  model: Models['items'],
+  additionalConfig: {},
+  callBack: (err, model) => {
+    console.log(err)
+  },
+})
 
 // const user = DBconnections['users'].select('*').where({ id: 1 }).first()
 // const item = DBconnections['items'].select('*').where({ id: 1 }).first()

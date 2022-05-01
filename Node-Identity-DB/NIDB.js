@@ -32,13 +32,13 @@ import modelManager from './model_conversions/modelManager.js'
 const NIDB = class {
   databaseConnections = {}
 
-  static useDatabase = async (
+  static useDatabase = async ({
     connectionName,
     databaseType,
     connectionConfig,
-    additionalConfig = {},
-    callBack
-  ) => {
+    additionalConfig,
+    callBack,
+  }) => {
     if (connectionName && databaseType && connectionConfig && callBack) {
       this.databaseConnections = {
         ...this.databaseConnections,
@@ -70,13 +70,13 @@ const NIDB = class {
     }
   }
 
-  static useModel = (
+  static useModel = ({
     connectionName,
     modelName,
     model,
-    additionalConfig = {},
-    callBack
-  ) => {
+    additionalConfig,
+    callBack,
+  }) => {
     if (connectionName && modelName && model) {
       modelManager.validateModel(model, (err, valid) => {
         if (!err && valid) {

@@ -4,7 +4,7 @@ Models['users'] = {
   id: {
     key: 'primary',
     type: 'int',
-    increments: true,
+    unique: true,
     nullable: false,
   },
   name: {
@@ -21,7 +21,7 @@ Models['items'] = {
   id: {
     key: 'primary',
     type: 'int',
-    increments: true,
+    unique: true,
     nullable: false,
   },
   name: {
