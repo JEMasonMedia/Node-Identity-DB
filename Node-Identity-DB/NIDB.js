@@ -60,7 +60,7 @@ const NIDB = class {
         delete this.databaseConnections[connectionName]
         callBack(client)
       } else {
-        this.databaseConnections[`${connectionName}`].connection = client
+        this.databaseConnections[connectionName].connection = client
         callBack(null, this.databaseConnections[connectionName])
       }
     } else {
@@ -68,27 +68,53 @@ const NIDB = class {
     }
   }
 
-  static useModel = ({
-    connectionName,
-    modelName,
-    model,
-    additionalConfig,
-    callBack,
-  }) => {
+  static useModel = async (
+    { connectionName, modelName, model, additionalConfig, callBack },
+    modifyTable = false
+  ) => {
     if (connectionName && modelName && model) {
-      modelManager.validateModel(model, (err, valid) => {
-        if (!err && valid) {
-          this.databaseConnections[connectionName].models[modelName] = {
-            modelName,
-            connectionName,
-            model: new modelManager(model),
-            additionalConfig,
+      try {
+        await modelManager.validateModel(model, async (err, valid) => {
+          if (!err && valid) {
+            this.databaseConnections[connectionName].models[modelName] =
+              new modelManager(
+                modelName,
+                connectionName,
+                model,
+                additionalConfig
+              )
+            if (modifyTable) {
+              try {
+                await modelManager.modifyTable(
+                  this.databaseConnections[connectionName],
+                  modelName,
+                  (err, model) => {
+                    if (!err && model) {
+                      console.log(
+                        `The collection: '${model.modelName}', on connection: '${model.connectionName}', was modified successfully!`
+                          .magenta
+                      )
+                    } else {
+                      callBack(err)
+                    }
+                  }
+                )
+              } catch (err) {
+                callBack({ err })
+              }
+            }
+          } else {
+            callBack({ err })
           }
-          callBack(null, this.databaseConnections[connectionName])
-        } else {
-          callBack({ err })
-        }
-      })
+        })
+      } catch (err) {
+        callBack({ err })
+      } finally {
+        callBack(
+          null,
+          this.databaseConnections[connectionName].models[modelName]
+        )
+      }
     } else {
       callBack({ err: 'Invalid arguments' })
     }

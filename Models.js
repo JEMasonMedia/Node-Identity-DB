@@ -4,7 +4,7 @@ const modelConnections = {}
 models['users'] = {
   id: {
     key: 'primary',
-    type: 'int',
+    type: 'string',
     unique: true,
     nullable: false,
   },
@@ -21,7 +21,7 @@ models['users'] = {
 models['items'] = {
   id: {
     key: 'primary',
-    type: 'int',
+    type: 'string',
     unique: true,
     nullable: false,
   },
@@ -44,10 +44,10 @@ modelConnections['users'] = {
   modelName: 'users',
   model: models['users'],
   additionalConfig: {},
-  callBack: (err, dbConn) => {
-    if (!err && dbConn) {
+  callBack: (err, model) => {
+    if (!err && model) {
       console.log(
-        `The collection: '${dbConn.models['users'].modelName}', on connection: '${dbConn.connectionName}', was created successfully!`
+        `The collection: '${model.modelName}', for connection: '${model.connectionName}', was created successfully!`
           .cyan
       )
     } else {
@@ -61,10 +61,10 @@ modelConnections['items'] = {
   modelName: 'items',
   model: models['items'],
   additionalConfig: {},
-  callBack: (err, dbConn) => {
-    if (!err && dbConn) {
+  callBack: (err, model) => {
+    if (!err && model) {
       console.log(
-        `The collection: '${dbConn.models['items'].modelName}', on connection: '${dbConn.connectionName}', was created successfully!`
+        `The collection: '${model.modelName}', for connection: '${model.connectionName}', was created successfully!`
           .cyan
       )
     } else {

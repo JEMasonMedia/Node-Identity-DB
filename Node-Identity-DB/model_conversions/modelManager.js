@@ -1,8 +1,13 @@
 import supportedDBs from '../supportedDBs/supportedDBs.js'
+import dbManager from '../db_connections/dbManager.js'
+import NIDB from '../NIDB.js'
 
 const modelManager = class {
-  constructor(model) {
+  constructor(modelName, connectionName, model, additionalConfig) {
+    this.modelName = modelName
+    this.connectionName = connectionName
     this.model = model
+    this.additionalConfig = additionalConfig
   }
 
   // C R U D
@@ -11,8 +16,37 @@ const modelManager = class {
   update = (data, callBack) => {}
   delete = (data, callBack) => {}
 
+  // M A N A G E R
+  // Ensures the model and the table in the database are in sync
+  // Allows for runtime modifications of the table, especially significant for SQL databases
+  //   - For a database manger interface for easy multi database manipulation
+  //   - For runtime use such as adding and subtracting columns for both SQL and NoSQL databases
+  // This can be a very dangerous function and should be used very carefully during runtime and potentially only be used for testing and development
+  static async modifyTable(dbConn, modelName, callBack) {
+    if (dbConn && modelName && callBack) {
+      try {
+        const result = await dbManager.modifyTable(
+          dbConn.databaseType,
+          dbConn,
+          modelName
+        )
+        if (result.err) {
+          callBack(result)
+        } else {
+          callBack(null, dbConn.models[modelName])
+        }
+      } catch (err) {
+        callBack(err)
+      }
+    } else {
+      callBack({ err: 'Invalid arguments' })
+    }
+  }
+
   // Validate the model
-  static validateModel = (model, callBack) => {
+  // Ensures basic model structure
+  // Needs to be fleshed out
+  static async validateModel(model, callBack) {
     if (model && callBack) {
       const modelKeys = Object.keys(model)
       const modelKeysLength = modelKeys.length

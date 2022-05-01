@@ -1,49 +1,57 @@
 import supportedDBs from '../supportedDBs/supportedDBs.js'
 
-const dbManager = {
-  connectDB: async (databaseType, connectionConfig, additionalConfig) => {
-    databaseType =
-      typeof databaseType == 'string' && databaseType !== ''
-        ? databaseType
-        : false
+export default class dbManager {
+  static async connectDB(databaseType, connectionConfig, additionalConfig) {
+    databaseType = dbManager.validateDBType(databaseType) ? databaseType : false
 
     if (databaseType) {
       try {
-        if (supportedDBs[databaseType]) {
-          return await supportedDBs[databaseType].manager.connectDB(
-            connectionConfig,
-            additionalConfig
-          )
-        } else {
-          return { err: 'Unsupported database type' }
-        }
+        return await supportedDBs[databaseType].connectionManager.connectDB(
+          connectionConfig,
+          additionalConfig
+        )
       } catch (error) {
         return { err: 'Error connecting to the DB', error }
       }
     } else {
       return { err: 'Unsupported database type' }
     }
-  },
-  disconnectDB: async (databaseType, dbConn) => {
-    databaseType =
-      typeof databaseType == 'string' && databaseType !== ''
-        ? databaseType
-        : false
+  }
+
+  static async disconnectDB(databaseType, dbConn) {
+    databaseType = dbManager.validateDBType(databaseType) ? databaseType : false
 
     if (databaseType) {
       try {
-        if (supportedDBs[databaseType]) {
-          return await supportedDBs[databaseType].manager.disconnectDB(dbConn)
-        } else {
-          return { err: 'Unsupported database type' }
-        }
+        return await supportedDBs[databaseType].connectionManager.disconnectDB(
+          dbConn
+        )
       } catch (error) {
         return { err: 'Error closing the connection', error }
       }
     } else {
       return { err: 'Unsupported database type' }
     }
-  },
-}
+  }
 
-export default dbManager
+  static validateDBType(databaseType) {
+    return supportedDBs.validateDBType(databaseType)
+  }
+
+  static async modifyTable(databaseType, dbConn, modelName) {
+    databaseType = dbManager.validateDBType(databaseType) ? databaseType : false
+
+    if (databaseType) {
+      try {
+        return await supportedDBs[databaseType].connectionManager.modifyTable(
+          dbConn,
+          modelName
+        )
+      } catch (error) {
+        return { err: 'Error modifying table', error }
+      }
+    } else {
+      return { err: 'Unsupported database type' }
+    }
+  }
+}

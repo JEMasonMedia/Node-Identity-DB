@@ -1,8 +1,8 @@
 import mysql from 'mysql2/promise'
 import knex from 'knex'
 
-const MySql2DBManager = {
-  connectDB: async (connectionConfig, additionalConfig) => {
+export default class MongoDBManager {
+  static async connectDB(connectionConfig, additionalConfig) {
     try {
       const conn = knex({
         client: 'mysql2',
@@ -13,8 +13,9 @@ const MySql2DBManager = {
     } catch (err) {
       return { err }
     }
-  },
-  disconnectDB: async (dbConn) => {
+  }
+
+  static async disconnectDB(dbConn) {
     try {
       let str = dbConn.DBconnID
       await dbConn.connection.destroy()
@@ -22,7 +23,5 @@ const MySql2DBManager = {
     } catch (err) {
       return { err }
     }
-  },
+  }
 }
-
-export default MySql2DBManager

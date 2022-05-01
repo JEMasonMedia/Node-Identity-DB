@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb'
 
-const MongoDBManager = {
-  connectDB: async (connectionConfig, additionalConfig) => {
+export default class MongoDBManager {
+  static async connectDB(connectionConfig, additionalConfig) {
     try {
       // this needs to be fleshed out
       // for atlas
@@ -11,12 +11,12 @@ const MongoDBManager = {
 
       let mongoURI = ''
 
-      const userPass =
+      const dbPass =
         connectionConfig.user && connectionConfig.password
           ? `${connectionConfig.user}:${connectionConfig.password}@`
           : null
 
-      if (userPass === null)
+      if (dbPass === null)
         mongoURI = `mongodb://${connectionConfig.host}:${connectionConfig.port}/${connectionConfig.database}`
       else
         mongoURI = `mongodb+srv://${userPass}${connectionConfig.host}/${connectionConfig.database}?retryWrites=true&w=majority`
@@ -24,12 +24,15 @@ const MongoDBManager = {
       const client = new MongoClient(mongoURI)
       await client.connect()
 
+      // console.log(client.db)
+
       return client
     } catch (err) {
       return { err }
     }
-  },
-  disconnectDB: async (dbConn) => {
+  }
+
+  static async disconnectDB(dbConn) {
     try {
       let str = dbConn.DBconnID
       await dbConn.connection.close()
@@ -37,7 +40,29 @@ const MongoDBManager = {
     } catch (err) {
       return { err }
     }
-  },
-}
+  }
 
-export default MongoDBManager
+  static async modifyTable(dbConn, modelName) {
+    try {
+      console.log(dbConn.connection.db())
+      const collections = await dbConn.connection
+        .db()
+        .listCollections()
+        .toArray()
+      console.log(collections)
+      // const db = dbConn.db(modelName)
+      // const collection = db.collection(modelName)
+      // const collectionExists = await collection.countDocuments()
+
+      // if (collectionExists === 0) {
+      //   await collection.createIndex({
+      //     _id: 1,
+      //   })
+      // }
+
+      return true
+    } catch (err) {
+      return { err }
+    }
+  }
+}
