@@ -1,6 +1,6 @@
 import './ancillaryImports.js'
 import NIDB from './Node-Identity-DB/NIDB.js'
-import DBconnections from './DCconnections.js'
+import DBconnections from './DBconnections.js'
 import modelConnections from './Models.js'
 
 await NIDB.useDatabase(DBconnections['users'])
