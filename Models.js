@@ -1,6 +1,7 @@
-const Models = {}
+const models = {}
+const modelConnections = {}
 
-Models['users'] = {
+models['users'] = {
   id: {
     key: 'primary',
     type: 'int',
@@ -17,7 +18,7 @@ Models['users'] = {
   },
 }
 
-Models['items'] = {
+models['items'] = {
   id: {
     key: 'primary',
     type: 'int',
@@ -38,4 +39,38 @@ Models['items'] = {
   },
 }
 
-export default Models
+modelConnections['users'] = {
+  connectionName: 'users',
+  modelName: 'users',
+  model: models['users'],
+  additionalConfig: {},
+  callBack: (err, dbConn) => {
+    if (!err && dbConn) {
+      console.log(
+        `The collection: '${dbConn.models['users'].modelName}', on connection: '${dbConn.connectionName}', was created successfully!`
+          .cyan
+      )
+    } else {
+      console.log(err)
+    }
+  },
+}
+
+modelConnections['items'] = {
+  connectionName: 'items',
+  modelName: 'items',
+  model: models['items'],
+  additionalConfig: {},
+  callBack: (err, dbConn) => {
+    if (!err && dbConn) {
+      console.log(
+        `The collection: '${dbConn.models['items'].modelName}', on connection: '${dbConn.connectionName}', was created successfully!`
+          .cyan
+      )
+    } else {
+      console.log(err)
+    }
+  },
+}
+
+export default modelConnections

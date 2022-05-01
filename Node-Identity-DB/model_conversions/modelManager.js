@@ -1,8 +1,6 @@
 import supportedDBs from '../supportedDBs/supportedDBs.js'
 
 const modelManager = class {
-  model = {}
-
   constructor(model) {
     this.model = model
   }

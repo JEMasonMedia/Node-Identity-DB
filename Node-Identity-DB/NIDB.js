@@ -30,8 +30,6 @@ import dbManager from './db_connections/dbManager.js'
 import modelManager from './model_conversions/modelManager.js'
 
 const NIDB = class {
-  databaseConnections = {}
-
   static useDatabase = async ({
     connectionName,
     databaseType,
@@ -59,11 +57,11 @@ const NIDB = class {
       )
 
       if (client.err) {
-        delete this.databaseConnections[`${connectionName}`]
+        delete this.databaseConnections[connectionName]
         callBack(client)
       } else {
         this.databaseConnections[`${connectionName}`].connection = client
-        callBack(null, this.databaseConnections[`${connectionName}`])
+        callBack(null, this.databaseConnections[connectionName])
       }
     } else {
       callBack({ err: 'Invalid arguments' })
@@ -80,13 +78,13 @@ const NIDB = class {
     if (connectionName && modelName && model) {
       modelManager.validateModel(model, (err, valid) => {
         if (!err && valid) {
-          this.databaseConnections[`${connectionName}`].models[`${modelName}`] =
-            {
-              modelName,
-              connectionName,
-              model: new modelManager(model),
-              additionalConfig,
-            }
+          this.databaseConnections[connectionName].models[modelName] = {
+            modelName,
+            connectionName,
+            model: new modelManager(model),
+            additionalConfig,
+          }
+          callBack(null, this.databaseConnections[connectionName])
         } else {
           callBack({ err })
         }
