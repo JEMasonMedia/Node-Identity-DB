@@ -2,7 +2,7 @@ import supportedDBs from '../supportedDBs/supportedDBs.js'
 import dbManager from '../db_connections/dbManager.js'
 import NIDB from '../NIDB.js'
 
-const modelManager = class {
+export default class modelManager {
   constructor(modelName, connectionName, model, additionalConfig) {
     this.modelName = modelName
     this.connectionName = connectionName
@@ -22,7 +22,8 @@ const modelManager = class {
   //   - For a database manger interface for easy multi database manipulation
   //   - For runtime use such as adding and subtracting columns for both SQL and NoSQL databases
   // This can be a very dangerous function and should be used very carefully during runtime and potentially only be used for testing and development
-  static async modifyTable(dbConn, modelName, callBack) {
+
+  static modifyTable = async (dbConn, modelName, callBack) => {
     if (dbConn && modelName && callBack) {
       try {
         const result = await dbManager.modifyTable(
@@ -46,7 +47,7 @@ const modelManager = class {
   // Validate the model
   // Ensures basic model structure
   // Needs to be fleshed out
-  static async validateModel(model, callBack) {
+  static validateModel = (model, callBack) => {
     if (model && callBack) {
       const modelKeys = Object.keys(model)
       const modelKeysLength = modelKeys.length
@@ -104,9 +105,24 @@ const modelManager = class {
     }
   }
 
+  static getDefaultValue = (type, modelKey) => {
+    switch (type) {
+      case 'string':
+        return modelKey.defaultValue ? modelKey.defaultValue : ''
+      case 'number':
+        return modelKey.defaultValue ? modelKey.defaultValue : 0
+      case 'boolean':
+        return modelKey.defaultValue ? modelKey.defaultValue : false
+      case 'array':
+        return modelKey.defaultValue ? modelKey.defaultValue : []
+      case 'object':
+        return modelKey.defaultValue ? modelKey.defaultValue : {}
+      default:
+        throw new Error(`Unknown type: ${modelKey}`)
+    }
+  }
+
   getModel = () => {
     return this.model
   }
 }
-
-export default modelManager

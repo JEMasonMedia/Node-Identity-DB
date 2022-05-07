@@ -1,7 +1,11 @@
 import supportedDBs from '../supportedDBs/supportedDBs.js'
 
 export default class dbManager {
-  static async connectDB(databaseType, connectionConfig, additionalConfig) {
+  static connectDB = async (
+    databaseType,
+    connectionConfig,
+    additionalConfig
+  ) => {
     databaseType = dbManager.validateDBType(databaseType) ? databaseType : false
 
     if (databaseType) {
@@ -18,7 +22,7 @@ export default class dbManager {
     }
   }
 
-  static async disconnectDB(databaseType, dbConn) {
+  static disconnectDB = async (databaseType, dbConn) => {
     databaseType = dbManager.validateDBType(databaseType) ? databaseType : false
 
     if (databaseType) {
@@ -34,11 +38,11 @@ export default class dbManager {
     }
   }
 
-  static validateDBType(databaseType) {
+  static validateDBType = async (databaseType) => {
     return supportedDBs.validateDBType(databaseType)
   }
 
-  static async modifyTable(databaseType, dbConn, modelName) {
+  static modifyTable = async (databaseType, dbConn, modelName) => {
     databaseType = dbManager.validateDBType(databaseType) ? databaseType : false
 
     if (databaseType) {

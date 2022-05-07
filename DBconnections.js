@@ -14,16 +14,6 @@ const DBconnections = {
       },
     },
     additionalConfig: {},
-    callBack: (err, dbConn) => {
-      if (!err && dbConn) {
-        console.log(
-          `The ${dbConn.databaseType} connection: '${dbConn.connectionName}', on host '${dbConn.connectionConfig.host}', has connected successfully!`
-            .red
-        )
-      } else {
-        console.log(err)
-      }
-    },
   },
   items: {
     connectionName: 'items',
@@ -36,16 +26,16 @@ const DBconnections = {
       database: process.env.MYSQL_DATABASE,
     },
     additionalConfig: {},
-    callBack: (err, dbConn) => {
-      if (!err && dbConn) {
-        console.log(
-          `The ${dbConn.databaseType} connection: '${dbConn.connectionName}', on host '${dbConn.connectionConfig.host}', has connected successfully!`
-            .red
-        )
-      } else {
-        console.log(err)
-      }
-    },
+  },
+  callBack: (err, dbConn) => {
+    if (!err && dbConn) {
+      console.log(
+        `The ${dbConn.databaseType} connection: '${dbConn.connectionName}', on host '${dbConn.connectionConfig.host}', has connected successfully!`
+          .red
+      )
+    } else {
+      console.log(err)
+    }
   },
 }
 

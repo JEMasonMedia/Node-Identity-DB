@@ -30,14 +30,11 @@ import dbManager from './db_connections/dbManager.js'
 import modelManager from './model_conversions/modelManager.js'
 
 const NIDB = class {
-  static useDatabase = async ({
-    connectionName,
-    databaseType,
-    connectionConfig,
-    additionalConfig,
-    callBack,
-  }) => {
-    if (connectionName && databaseType && connectionConfig && callBack) {
+  useDatabase = async (
+    { connectionName, databaseType, connectionConfig, additionalConfig },
+    callBack = false
+  ) => {
+    if (connectionName && databaseType && connectionConfig) {
       this.databaseConnections = {
         ...this.databaseConnections,
         [`${connectionName}`]: {
@@ -58,23 +55,26 @@ const NIDB = class {
 
       if (client.err) {
         delete this.databaseConnections[connectionName]
-        callBack(client)
+        if (callBack) callBack(client)
+        return false
       } else {
         this.databaseConnections[connectionName].connection = client
-        callBack(null, this.databaseConnections[connectionName])
+        if (callBack) callBack(null, this.databaseConnections[connectionName])
+        return true
       }
     } else {
-      callBack({ err: 'Invalid arguments' })
+      if (callBack) callBack({ err: 'Invalid arguments' })
+      return false
     }
   }
 
-  static useModel = async (
-    { connectionName, modelName, model, additionalConfig, callBack },
-    modifyTable = false
+  useModel = async (
+    { connectionName, modelName, model, additionalConfig },
+    callBack = false
   ) => {
     if (connectionName && modelName && model) {
       try {
-        await modelManager.validateModel(model, async (err, valid) => {
+        modelManager.validateModel(model, (err, valid) => {
           if (!err && valid) {
             this.databaseConnections[connectionName].models[modelName] =
               new modelManager(
@@ -83,70 +83,71 @@ const NIDB = class {
                 model,
                 additionalConfig
               )
-            if (modifyTable) {
-              try {
-                await modelManager.modifyTable(
-                  this.databaseConnections[connectionName],
-                  modelName,
-                  (err, model) => {
-                    if (!err && model) {
-                      console.log(
-                        `The collection: '${model.modelName}', on connection: '${model.connectionName}', was modified successfully!`
-                          .magenta
-                      )
-                    } else {
-                      callBack(err)
-                    }
-                  }
-                )
-              } catch (err) {
-                callBack({ err })
-              }
-            }
           } else {
-            callBack({ err })
+            if (callBack) callBack({ err })
+            return false
           }
         })
       } catch (err) {
-        callBack({ err })
+        if (callBack) callBack({ err })
+        return false
       } finally {
-        callBack(
-          null,
-          this.databaseConnections[connectionName].models[modelName]
-        )
+        if (callBack)
+          callBack(
+            null,
+            this.databaseConnections[connectionName].models[modelName]
+          )
+        return true
       }
     } else {
-      callBack({ err: 'Invalid arguments' })
+      if (callBack) callBack({ err: 'Invalid arguments' })
+      return false
     }
   }
 
-  static createStore = (config) => {}
+  createStore = (config) => {}
 
-  static closeConnections = (dbs, callBack) => {
+  closeConnections = async (dbs, callBack = false) => {
     let list = []
+    let results = null
     let errors = []
 
     try {
-      if (!dbs) dbs = Object.keys(this.databaseConnections)
+      if (dbs) {
+        if (typeof dbs === 'string') {
+          list.push(dbs)
+        } else if (Array.isArray(dbs)) {
+          list = dbs
+        } else {
+          if (callBack) callBack({ err: 'Invalid arguments' })
+          else return false
+        }
+      } else {
+        list = Object.keys(this.databaseConnections)
+      }
 
-      dbs.map(async (dbConnID) => {
-        const result = dbManager.disconnectDB(
-          this.databaseConnections[dbConnID].databaseType,
-          this.databaseConnections[dbConnID]
+      for (let i = 0; i < list.length; i++) {
+        results = await dbManager.disconnectDB(
+          this.databaseConnections[list[i]].databaseType,
+          this.databaseConnections[list[i]]
         )
 
-        if (result.err) {
-          errors.push({ dbConnID, err: result.err })
-        } else {
-          list.push(dbConnID)
-          delete this.databaseConnections[dbConnID]
+        if (results?.err) {
+          errors.push({ connectionName: list[i], err: results.err })
         }
-      })
+      }
+
+      if (errors.length > 0) {
+        callBack(errors)
+        if (callBack) callBack({ err: errors })
+        return false
+      } else {
+        if (callBack) callBack(null, list)
+        return true
+      }
     } catch (err) {
-      callBack(err)
-    } finally {
-      if (errors.length > 0) callBack(errors, list)
-      else callBack(null, list)
+      if (callBack) callBack({ err })
+      return false
     }
   }
 }

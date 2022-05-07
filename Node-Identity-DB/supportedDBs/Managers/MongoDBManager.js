@@ -1,7 +1,8 @@
 import { MongoClient } from 'mongodb'
+import modelManager from '../../model_conversions/modelManager.js'
 
 export default class MongoDBManager {
-  static async connectDB(connectionConfig, additionalConfig) {
+  static connectDB = async (connectionConfig, additionalConfig) => {
     try {
       // this needs to be fleshed out
       // for atlas
@@ -27,14 +28,25 @@ export default class MongoDBManager {
       // console.log(client.db)
 
       return client
+
+      // if (dbPass === null)
+      //   mongoURI = `mongodb://${connectionConfig.host}:${connectionConfig.port}`
+      // else
+      //   mongoURI = `mongodb+srv://${userPass}${connectionConfig.host}?retryWrites=true&w=majority`
+
+      // const client = new MongoClient(mongoURI)
+      // await client.connect()
+      // client.db(connectionConfig.database)
+
+      // return client
     } catch (err) {
       return { err }
     }
   }
 
-  static async disconnectDB(dbConn) {
+  static disconnectDB = async (dbConn) => {
     try {
-      let str = dbConn.DBconnID
+      let str = dbConn.connectionName
       await dbConn.connection.close()
       return str
     } catch (err) {
@@ -42,23 +54,49 @@ export default class MongoDBManager {
     }
   }
 
-  static async modifyTable(dbConn, modelName) {
+  static modifyTable = async (dbConn, modelName) => {
     try {
-      console.log(dbConn.connection.db())
-      const collections = await dbConn.connection
-        .db()
-        .listCollections()
-        .toArray()
-      console.log(collections)
-      // const db = dbConn.db(modelName)
-      // const collection = db.collection(modelName)
-      // const collectionExists = await collection.countDocuments()
+      const collection = await dbConn.connection.db().collection(modelName)
+      const numDocs = await collection.countDocuments()
+      const fields = Object.keys(dbConn.models[modelName].model)
+      const model = dbConn.models[modelName].model
+      const pageSize = 100
+      const numPages = Math.ceil(numDocs / pageSize)
 
-      // if (collectionExists === 0) {
-      //   await collection.createIndex({
-      //     _id: 1,
-      //   })
-      // }
+      for (let i = 0; i < numPages; i++) {
+        const cursor = await collection
+          .find({})
+          .skip(i * pageSize)
+          .limit(pageSize)
+        const docs = await cursor.toArray()
+        for (let j = 0; j < docs.length; j++) {
+          const doc = docs[j]
+          const docKeys = Object.keys(doc)
+          let trigger = false
+          for (let k = 0; k < fields.length; k++) {
+            const key = fields[k]
+            if (!docKeys.includes(key)) {
+              doc[key] = modelManager.getDefaultValue(
+                model[key].type,
+                model[key]
+              )
+              trigger = true
+            }
+          }
+          if (trigger)
+            await collection.updateOne({ _id: doc._id }, { $set: doc })
+          trigger = false
+
+          for (let k = 0; k < docKeys.length; k++) {
+            const key = docKeys[k]
+            if (!fields.includes(key)) {
+              delete doc[key]
+              let t = { [key]: 1 }
+              await collection.updateMany({}, { $unset: { [key]: 1 } })
+            }
+          }
+        }
+      }
 
       return true
     } catch (err) {
