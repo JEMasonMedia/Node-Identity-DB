@@ -25,20 +25,7 @@ export default class MongoDBManager {
       const client = new MongoClient(mongoURI)
       await client.connect()
 
-      // console.log(client.db)
-
       return client
-
-      // if (dbPass === null)
-      //   mongoURI = `mongodb://${connectionConfig.host}:${connectionConfig.port}`
-      // else
-      //   mongoURI = `mongodb+srv://${userPass}${connectionConfig.host}?retryWrites=true&w=majority`
-
-      // const client = new MongoClient(mongoURI)
-      // await client.connect()
-      // client.db(connectionConfig.database)
-
-      // return client
     } catch (err) {
       return { err }
     }

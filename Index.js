@@ -7,25 +7,45 @@ import Models from './Models.js'
 const init = async () => {
   // establish database connections
   const dbConnections = new NIDB()
-  await dbConnections.useDatabase(
-    DBconnections['users'],
-    DBconnections.callBack
-  )
-  // await dbConnections.useDatabase(
-  //   DBconnections['items'],
+  // await dbConnections.useDatabases(
+  //   [DBconnections['users'], DBconnections['items']],
   //   DBconnections.callBack
   // )
+  // await dbConnections.useDatabase(
+  //   DBconnections['users'],
+  //   DBconnections.callBack
+  // )
+  await dbConnections.useDatabase(
+    DBconnections['items'],
+    DBconnections.callBack
+  )
   // connections['users'] = await NIDB.useDatabase(DBconnections['users'])
   // await NIDB.useDatabase(DBconnections['items'])
 
   // establish model connections
   // arguments: model
-  await dbConnections.useModel(Models['users'], Models.callBack)
-  // await NIDB.useModel(modelConnections['items'])
+  // dbConnections.useModels([Models['users'], Models['items']], Models.callBack)
+  // dbConnections.useModel(Models['users'], Models.callBack)
+  dbConnections.useModel(Models['items'], Models.callBack)
+
+  // await modelManager.modifyTable(
+  //   dbConnections.databaseConnections['users'],
+  //   'users',
+  //   (err, model) => {
+  //     if (!err && model) {
+  //       console.log(
+  //         `The collection: '${model.modelName}', on connection: '${model.connectionName}', was modified successfully!`
+  //           .magenta
+  //       )
+  //     } else {
+  //       console.log(err)
+  //     }
+  //   }
+  // )
 
   await modelManager.modifyTable(
-    dbConnections.databaseConnections['users'],
-    'users',
+    dbConnections.databaseConnections['items'],
+    'items',
     (err, model) => {
       if (!err && model) {
         console.log(
@@ -37,21 +57,6 @@ const init = async () => {
       }
     }
   )
-
-  // await modelManager.modifyTable(
-  //   NIDB.databaseConnections['items'],
-  //   modelConnections['items'].modelName,
-  //   (err, dbConn) => {
-  //     if (!err && dbConn) {
-  //       console.log(
-  //         `The collection: '${model.modelName}', on connection: '${model.connectionName}', was modified successfully!`
-  //           .magenta
-  //       )
-  //     } else {
-  //       console.log(err)
-  //     }
-  //   }
-  // )
 
   // const user = DBconnections['users'].select('*').where({ id: 1 }).first()
   // const item = DBconnections['items'].select('*').where({ id: 1 }).first()

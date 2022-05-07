@@ -30,6 +30,16 @@ import dbManager from './db_connections/dbManager.js'
 import modelManager from './model_conversions/modelManager.js'
 
 const NIDB = class {
+  databaseConnections = {}
+  models = {}
+  store = {}
+
+  useDatabases = async (dbConnections, callback) => {
+    for (let i = 0; i < dbConnections.length; i++) {
+      await this.useDatabase(dbConnections[i], callback)
+    }
+  }
+
   useDatabase = async (
     { connectionName, databaseType, connectionConfig, additionalConfig },
     callBack = false
@@ -68,7 +78,13 @@ const NIDB = class {
     }
   }
 
-  useModel = async (
+  useModels = (models, callback) => {
+    for (let i = 0; i < models.length; i++) {
+      this.useModel(models[i], callback)
+    }
+  }
+
+  useModel = (
     { connectionName, modelName, model, additionalConfig },
     callBack = false
   ) => {
