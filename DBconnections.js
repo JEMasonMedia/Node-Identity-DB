@@ -1,4 +1,4 @@
-const DBconnections = {
+export default {
   users: {
     connectionName: 'users',
     databaseType: 'MONGODB',
@@ -45,4 +45,4 @@ const DBconnections = {
 
 // console.log(NIDB.databaseConnections)
 
-export default DBconnections
+// export default DBconnections

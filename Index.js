@@ -28,7 +28,7 @@ const init = async () => {
   // dbConnections.useModel(Models['users'], Models.callBack)
   dbConnections.useModel(Models['items'], Models.callBack)
 
-  // await modelManager.modifyTable(
+  // await modelManager.createModifyTable(
   //   dbConnections.databaseConnections['users'],
   //   'users',
   //   (err, model) => {
@@ -43,7 +43,7 @@ const init = async () => {
   //   }
   // )
 
-  await modelManager.modifyTable(
+  await modelManager.createModifyTable(
     dbConnections.databaseConnections['items'],
     'items',
     (err, model) => {

@@ -10,10 +10,10 @@ const models = {
       type: 'string',
       nullable: false,
     },
-    // city: {
-    //   type: 'string',
-    //   nullable: true,
-    // },
+    city: {
+      type: 'string',
+      nullable: true,
+    },
     cart: {
       type: 'array',
       nullable: true,
@@ -41,7 +41,7 @@ const models = {
   },
 }
 
-const Models = {
+export default {
   users: {
     connectionName: 'users',
     modelName: 'users',
@@ -65,5 +65,3 @@ const Models = {
     }
   },
 }
-
-export default Models

@@ -1,9 +1,17 @@
-import supportedDBs from '../supportedDBs/supportedDBs.js'
-import dbManager from '../db_connections/dbManager.js'
-import NIDB from '../NIDB.js'
+// import supportedDBs from '../supportedDBs/supportedDBs.js'
+// import NIDB from '../NIDB.js'
+import connectionManager from '../db_connections/connectionManager.js'
+import queryBuilder from '../query_builders/queryBuilder.js'
 
 export default class modelManager {
-  constructor(modelName, connectionName, model, additionalConfig) {
+  constructor(
+    databaseType,
+    modelName,
+    connectionName,
+    model,
+    additionalConfig
+  ) {
+    this.databaseType = databaseType
     this.modelName = modelName
     this.connectionName = connectionName
     this.model = model
@@ -11,10 +19,10 @@ export default class modelManager {
   }
 
   // C R U D
-  create = (data, callBack) => {}
-  read = (data, callBack) => {}
-  update = (data, callBack) => {}
-  delete = (data, callBack) => {}
+  // create = (data, callBack) => {}
+  // read = (data, callBack) => {}
+  // update = (data, callBack) => {}
+  // delete = (data, callBack) => {}
 
   // M A N A G E R
   // Ensures the model and the table in the database are in sync
@@ -23,10 +31,10 @@ export default class modelManager {
   //   - For runtime use such as adding and subtracting columns for both SQL and NoSQL databases
   // This can be a very dangerous function and should be used very carefully during runtime and potentially only be used for testing and development
 
-  static modifyTable = async (dbConn, modelName, callBack) => {
+  static createModifyTable = async (dbConn, modelName, callBack) => {
     if (dbConn && modelName && callBack) {
       try {
-        const result = await dbManager.modifyTable(
+        const result = await connectionManager.createModifyTable(
           dbConn.databaseType,
           dbConn,
           modelName
@@ -106,20 +114,21 @@ export default class modelManager {
   }
 
   static getDefaultValue = (type, modelKey) => {
-    switch (type) {
-      case 'string':
-        return modelKey.defaultValue ? modelKey.defaultValue : ''
-      case 'number':
-        return modelKey.defaultValue ? modelKey.defaultValue : 0
-      case 'boolean':
-        return modelKey.defaultValue ? modelKey.defaultValue : false
-      case 'array':
-        return modelKey.defaultValue ? modelKey.defaultValue : []
-      case 'object':
-        return modelKey.defaultValue ? modelKey.defaultValue : {}
-      default:
-        throw new Error(`Unknown type: ${modelKey}`)
+    try {
+      return modelKey.defaultValue
+        ? modelKey.defaultValue
+        : this.genericTypes[type]
+    } catch (error) {
+      throw new Error(`Unknown type: ${modelKey}`)
     }
+  }
+
+  genericTypes = {
+    string: '',
+    number: 0,
+    boolean: false,
+    array: [],
+    object: {},
   }
 
   getModel = () => {

@@ -26,13 +26,14 @@
  */
 
 // import helpers from './helpers/helpers.js'
-import dbManager from './db_connections/dbManager.js'
+import connectionManager from './db_connections/connectionManager.js'
 import modelManager from './model_conversions/modelManager.js'
+import connection from './db_connections/connection.js'
 
-const NIDB = class {
-  databaseConnections = {}
-  models = {}
-  store = {}
+export default class NIDB {
+  constructor() {
+    this.databaseConnections = {}
+  }
 
   useDatabases = async (dbConnections, callback) => {
     for (let i = 0; i < dbConnections.length; i++) {
@@ -47,17 +48,15 @@ const NIDB = class {
     if (connectionName && databaseType && connectionConfig) {
       this.databaseConnections = {
         ...this.databaseConnections,
-        [`${connectionName}`]: {
+        [`${connectionName}`]: new connection(
           connectionName,
           databaseType,
           connectionConfig,
-          additionalConfig,
-          connection: null,
-          models: {},
-        },
+          additionalConfig
+        ),
       }
 
-      const client = await dbManager.connectDB(
+      const client = await connectionManager.connectDB(
         databaseType,
         connectionConfig,
         additionalConfig
@@ -94,6 +93,7 @@ const NIDB = class {
           if (!err && valid) {
             this.databaseConnections[connectionName].models[modelName] =
               new modelManager(
+                this.databaseConnections[connectionName].databaseType,
                 modelName,
                 connectionName,
                 model,
@@ -143,7 +143,7 @@ const NIDB = class {
       }
 
       for (let i = 0; i < list.length; i++) {
-        results = await dbManager.disconnectDB(
+        results = await connectionManager.disconnectDB(
           this.databaseConnections[list[i]].databaseType,
           this.databaseConnections[list[i]]
         )
@@ -167,5 +167,3 @@ const NIDB = class {
     }
   }
 }
-
-export default NIDB

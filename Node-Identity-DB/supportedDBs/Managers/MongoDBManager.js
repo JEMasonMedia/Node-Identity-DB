@@ -33,15 +33,14 @@ export default class MongoDBManager {
 
   static disconnectDB = async (dbConn) => {
     try {
-      let str = dbConn.connectionName
       await dbConn.connection.close()
-      return str
+      return dbConn.connectionName
     } catch (err) {
       return { err }
     }
   }
 
-  static modifyTable = async (dbConn, modelName) => {
+  static createModifyTable = async (dbConn, modelName) => {
     try {
       const collection = await dbConn.connection.db().collection(modelName)
       const numDocs = await collection.countDocuments()

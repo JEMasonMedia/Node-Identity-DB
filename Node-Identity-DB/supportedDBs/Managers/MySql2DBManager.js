@@ -1,13 +1,18 @@
 import mysql from 'mysql2/promise'
 import knex from 'knex'
 
-export default class MongoDBManager {
+export default class MySql2DBManager {
   static connectDB = async (connectionConfig, additionalConfig) => {
     try {
-      const conn = knex({
-        client: 'mysql2',
-        connectionConfig,
-      })
+      // const conn = knex({
+      //   client: 'mysql2',
+      //   connectionConfig,
+      // })
+
+      // conn.raw('SELECT VERSION()').then((version) => console.log(version[0][0]))
+
+      const conn = await mysql.createConnection(connectionConfig)
+      await conn.connect()
 
       return conn
     } catch (err) {
@@ -17,17 +22,58 @@ export default class MongoDBManager {
 
   static disconnectDB = async (dbConn) => {
     try {
-      let str = dbConn.connectionName
-      await dbConn.connection.destroy()
-      return str
+      // await dbConn.connection.destroy()
+      await dbConn.connection.end()
+      return dbConn.connectionName
     } catch (err) {
       return { err }
     }
   }
 
-  static modifyTable = async (dbConn, modelName) => {
+  static createModifyTable = async (dbConn, modelName) => {
     try {
-      console.log(await dbConn.connection.schema)
+      // const query = `SHOW TABLES LIKE "items2"`
+      //const q2 = `SELECT * FROM information_schema.tables WHERE table_schema = '${dbConn.connectionConfig.database}' AND table_name = '${modelName}' LIMIT 1`
+      const tableExistsQuery = dbConn.tableExists(modelName)
+      // console.log(await dbConn.connection.query(query))
+      const tableExists = await dbConn.connection.query(tableExistsQuery)
+      // console.log(tableExists)
+
+      console.log(dbConn.createTable(modelName))
+
+      // if (tableExists[0].length > 0) {
+      //   //nothing to do
+      // } else {
+      //   const createTableQuery = `CREATE TABLE ${modelName} (
+      //     _id VARCHAR(255) PRIMARY KEY,
+      //     name VARCHAR(255) NOT NULL,
+      //     description VARCHAR(255) NULL,
+      //     quantity INT NOT NULL
+      //   )`
+      //   await dbConn.connection.query(createTableQuery)
+      // }
+
+      // console.log(await dbConn.connection.schema)
+      // console.log(await dbConn.connection.table).table(dbConn.connectionName)
+      // const test = await dbConn.connection
+      //   .raw('SELECT VERSION()')
+      //   .then((version) => console.log(version[0][0]))
+      //   .catch((err) => {
+      //     console.log(err)
+      //     throw err
+      //   })
+      // console.log(test)
+
+      // await dbConn.connection.schema.hasTable(modelName).then((exists) => {
+      //   if (!exists) {
+      //     return dbConn.schema.createTable(modelName, (table) => {
+      //       table.increments('_id').primary()
+      //       table.string('name').notNullable()
+      //       table.string('description').nullable()
+      //       table.string('quantity').notNullable()
+      //     })
+      //   }
+      // })
       /*
       const collection = await dbConn.connection.db().collection(modelName)
       const numDocs = await collection.countDocuments()
