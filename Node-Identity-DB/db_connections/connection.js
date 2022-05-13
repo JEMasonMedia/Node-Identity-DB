@@ -14,5 +14,6 @@ export default class connection extends queryBuilder {
     this.additionalConfig = additionalConfig
     this.connection = null
     this.models = {}
+    this.isConnected = false
   }
 }

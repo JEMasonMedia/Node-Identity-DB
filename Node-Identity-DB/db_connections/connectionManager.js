@@ -1,18 +1,35 @@
 import supportedDBs from '../supportedDBs/supportedDBs.js'
 
 export default class connectionManager {
-  static connectDB = async (
-    databaseType,
-    connectionConfig,
-    additionalConfig
-  ) => {
-    databaseType = connectionManager.validateDBType(databaseType)
+  constructor(requiredDBtypes) {
+    // supportedDBs.init(requiredDBtypes)
+    // this.supportedDBs = supportedDBs
+    this.requiredDBtypes = requiredDBtypes
+  }
+
+  init = async () => {
+    try {
+      // await supportedDBs.init(this.requiredDBtypes)
+      this.supportedDBs = new supportedDBs()
+      await this.supportedDBs.init(this.requiredDBtypes)
+      return true
+    } catch (err) {
+      console.log(err)
+      return false
+    }
+  }
+
+  connectDB = async (databaseType, connectionConfig, additionalConfig) => {
+    databaseType = this.supportedDBs.validateDBType(databaseType)
       ? databaseType
       : false
 
     if (databaseType) {
       try {
-        return await supportedDBs[databaseType].connectionManager.connectDB(
+        // const connectionManager = await supportedDBs.getDBManager(databaseType)
+        return await this.supportedDBs.getDBManager(databaseType).connectDB(
+          // const t = await supportedDBs.getDBManager(databaseType)
+          // return await t.connectionManager.connectDB(
           connectionConfig,
           additionalConfig
         )
@@ -24,16 +41,18 @@ export default class connectionManager {
     }
   }
 
-  static disconnectDB = async (databaseType, dbConn) => {
-    databaseType = connectionManager.validateDBType(databaseType)
+  disconnectDB = async (databaseType, dbConn) => {
+    databaseType = this.supportedDBs.validateDBType(databaseType)
       ? databaseType
       : false
 
     if (databaseType) {
       try {
-        return await supportedDBs[databaseType].connectionManager.disconnectDB(
-          dbConn
-        )
+        return await this.supportedDBs
+          .getDBManager(databaseType)
+          .disconnectDB(dbConn)
+        // const t = await supportedDBs.getDBManager(databaseType)
+        // return await t.connectionManager.disconnectDB(dbConn)
       } catch (error) {
         return { err: 'Error closing the connection', error }
       }
@@ -42,20 +61,23 @@ export default class connectionManager {
     }
   }
 
-  static validateDBType = async (databaseType) => {
-    return supportedDBs.validateDBType(databaseType)
+  validateDBType = async (databaseType) => {
+    return this.supportedDBs.validateDBType(databaseType)
   }
 
-  static createModifyTable = async (databaseType, dbConn, modelName) => {
-    databaseType = connectionManager.validateDBType(databaseType)
+  createModifyTable = async (databaseType, dbConn, modelName) => {
+    databaseType = this.supportedDBs.validateDBType(databaseType)
       ? databaseType
       : false
 
     if (databaseType) {
       try {
-        return await supportedDBs[
-          databaseType
-        ].connectionManager.createModifyTable(dbConn, modelName)
+        this.supportedDBs.createModifyTable(dbConn, modelName)
+        // const t = await supportedDBs.getDBManager(databaseType)
+        // return await t.createModifyTable(dbConn, modelName)
+        // [
+        //   databaseType
+        // ].connectionManager.createModifyTable(dbConn, modelName)
       } catch (error) {
         return { err: 'Error modifying table', error }
       }
