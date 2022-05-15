@@ -23,6 +23,20 @@ dbConnections
     }
   })
 
+setTimeout(() => {
+  // console.log(dbConnections)
+
+  let test = dbConnections.hasActiveConnections()
+
+  dbConnections.closeConnections(null, (err, dbList) => {
+    if (!err && dbList) {
+      console.log(`Database connections closed:`.blue, dbList)
+    } else {
+      console.log(err)
+    }
+  })
+}, 1000)
+
 // dbConnections
 //   .useDatabases(
 //     [DBconnections['users'], DBconnections['items']],
@@ -45,18 +59,6 @@ dbConnections
 
 // dbConnections.useModel(Models['users'], Models.callBack)
 // dbConnections.useModel(Models['items'], Models.callBack)
-
-let test = dbConnections.hasActiveConnections()
-
-if (test) {
-  dbConnections.closeConnections(null, (err, dbList) => {
-    if (!err && dbList) {
-      console.log(`Database connections closed:`.blue, dbList)
-    } else {
-      console.log(err)
-    }
-  })
-}
 
 //.then(async (res) => {
 // if (!res) {

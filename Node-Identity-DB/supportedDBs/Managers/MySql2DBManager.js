@@ -2,6 +2,11 @@ import mysql from 'mysql2/promise'
 import knex from 'knex'
 
 export default class MySql2DBManager {
+  // constructor() {
+  //   this.dbType = 'MYSQLDB'
+  // }
+  static dbType = 'MYSQLDB'
+
   static connectDB = async (connectionConfig, additionalConfig) => {
     try {
       // const conn = knex({

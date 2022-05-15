@@ -33,6 +33,8 @@ import connection from './db_connections/connection.js'
 export default class NIDB {
   constructor() {
     this.databaseConnections = {}
+    this.loadedConnectionManagers = false
+    this.loadedDatabases = false
   }
 
   useDbTypes = (requiredDBtypes) => {
@@ -41,15 +43,21 @@ export default class NIDB {
       this.connectionManager
         .init()
         .then(() => {
+          console.log(
+            `Loaded connection managers for: ${requiredDBtypes}`.yellow
+          )
+          this.loadedConnectionManagers = true
           return this
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log(err)
           return false
         })
+
+      return this
     } catch (err) {
       return false
     }
-    return this
   }
 
   useDatabases = (dbConnections, callBack) => {
@@ -74,21 +82,26 @@ export default class NIDB {
             additionalConfig
           ),
         }
+        helpers
+          .waitFor((_) => this.loadedConnectionManagers === true)
+          .then((_) => {
+            this.connectionManager
+              .connectDB(databaseType, connectionConfig, additionalConfig)
+              .then((client) => {
+                if (client.err) {
+                  delete this.databaseConnections[connectionName]
+                  if (callBack) callBack(client)
+                } else {
+                  this.databaseConnections[connectionName].connection = client
+                  this.databaseConnections[connectionName].isConnected = true
 
-        const client = this.connectionManager
-          .connectDB(databaseType, connectionConfig, additionalConfig)
-          .then(() => {
-            if (client.err) {
-              delete this.databaseConnections[connectionName]
-              if (callBack) callBack(client)
-            } else {
-              this.databaseConnections[connectionName].connection = client
-              this.databaseConnections[connectionName].isConnected = true
-              if (callBack)
-                callBack(null, this.databaseConnections[connectionName])
-            }
+                  // this.loadedDatabases = true
+                  if (callBack)
+                    callBack(null, this.databaseConnections[connectionName])
+                }
 
-            return this
+                return this
+              })
           })
           .catch(() => {
             if (callBack) callBack({ err: 'Invalid arguments' })
@@ -113,13 +126,13 @@ export default class NIDB {
     { connectionName, modelName, model, additionalConfig },
     callBack = false
   ) => {
-    if (connectionName && modelName && model) {
-      helpers
-        .waitFor(
-          (_) => this.databaseConnections[connectionName].isConnected === true
-        )
-        .then((_) => {
-          try {
+    try {
+      if (connectionName && modelName && model) {
+        helpers
+          .waitFor(
+            (_) => this.databaseConnections[connectionName].isConnected === true
+          )
+          .then((_) => {
             modelManager.validateModel(model, (err, valid) => {
               if (!err && valid) {
                 this.databaseConnections[connectionName].models[modelName] =
@@ -130,22 +143,22 @@ export default class NIDB {
                     model,
                     additionalConfig
                   )
+
+                if (callBack)
+                  callBack(
+                    null,
+                    this.databaseConnections[connectionName].models[modelName]
+                  )
               } else {
                 if (callBack) callBack({ err })
               }
             })
-          } catch (err) {
-            if (callBack) callBack({ err })
-          } finally {
-            if (callBack)
-              callBack(
-                null,
-                this.databaseConnections[connectionName].models[modelName]
-              )
-          }
-        })
-    } else {
-      if (callBack) callBack({ err: 'Invalid arguments' })
+          })
+      } else {
+        if (callBack) callBack({ err: 'Invalid arguments' })
+      }
+    } catch (err) {
+      if (callBack) callBack({ err })
     }
     return this
   }
@@ -233,7 +246,7 @@ export default class NIDB {
             })
 
             let t = Date.now() - timeout
-            if (t > 100000) {
+            if (t > 5000) {
               throw new Error('Timeout')
             }
             return allSet

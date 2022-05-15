@@ -11,11 +11,11 @@ export default class connectionManager {
     try {
       // await supportedDBs.init(this.requiredDBtypes)
       this.supportedDBs = new supportedDBs()
-      await this.supportedDBs.init(this.requiredDBtypes)
-      return true
+
+      return await this.supportedDBs.init(this.requiredDBtypes)
     } catch (err) {
       console.log(err)
-      return false
+      return { err }
     }
   }
 

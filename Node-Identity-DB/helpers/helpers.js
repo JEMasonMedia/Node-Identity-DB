@@ -39,11 +39,14 @@ helpers.createComplexString = (segments) => {
 helpers.waitFor = (conditionFunction) => {
   const poll = (resolve) => {
     if (conditionFunction()) resolve()
-    else setTimeout((_) => poll(resolve), 400)
+    else setTimeout((_) => poll(resolve), 100)
   }
 
   return new Promise(poll)
 }
+
+helpers.asyncWait = async (wait) =>
+  new Promise((resolve) => setTimeout(resolve, wait))
 
 // Export the module
 export default helpers

@@ -2,6 +2,11 @@ import { MongoClient } from 'mongodb'
 import modelManager from '../../model_conversions/modelManager.js'
 
 export default class MongoDBManager {
+  // constructor() {
+  //   this.dbType = 'MONGODB'
+  // }
+  static dbType = 'MONGODB'
+
   static connectDB = async (connectionConfig, additionalConfig) => {
     try {
       // this needs to be fleshed out

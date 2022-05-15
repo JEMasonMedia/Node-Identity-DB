@@ -166,6 +166,7 @@ let somethingIsTrue = true
 const test = async () => {
   if (somethingIsTrue) {
     const module = await import('./something.js')
+
     // Use the module the way you want, as:
     module.default() // Default export
 
@@ -174,29 +175,36 @@ const test = async () => {
   }
 }
 
+import helpers from '../helpers/helpers.js'
+
+const supportedDBFiles = {
+  MONGODB: {
+    managerFile: './Managers/MongoDBManager.js',
+  },
+  MYSQLDB: {
+    managerFile: './Managers/MySql2DBManager.js',
+  },
+}
+
 const getSupportedDBs = async (dbTypes) => {
-  let def = null
+  let modules = []
   const supportedDBs = {}
-  for (let dbType of dbTypes) {
-    switch (dbType) {
-      case 'MONGODB':
-        def = await import('./Managers/MongoDBManager.js')
-        supportedDBs[dbType] = def.default
-        break
-      case 'MYSQLDB':
-        def = await import('./Managers/MySql2DBManager.js')
-        supportedDBs[dbType] = def.default
-        break
-      // case 'PGNATIVE':
-      //   import('./Managers/PostgresDBManager.js').then((module) => {
-      //     supportedDBs[dbType] = module.default
-      //   })
-      //   break
-      default:
-        new Error('Unsupported DB type')
+
+  try {
+    for (let dbType of dbTypes) {
+      modules.push(import(supportedDBFiles[dbType].managerFile))
     }
+
+    const modulesImported = await Promise.all(modules)
+    for (let module of modulesImported) {
+      supportedDBs[module.default.dbType] = module.default
+    }
+    // await helpers.asyncWait(1000)
+    // console.log(supportedDBs)
+    return supportedDBs
+  } catch (error) {
+    console.log(error)
   }
-  return supportedDBs
 }
 
 const checkTypes = (allowedTypes, types) => {
@@ -206,28 +214,94 @@ const checkTypes = (allowedTypes, types) => {
 }
 
 export default class {
-  #allowedDBs = []
-  #dbTypes = []
-  #supportedDBs = {}
+  allowedDBs = []
+  dbTypes = []
+  supportedDBs = {}
 
   init = async (requiredDBtypes) => {
-    this.#allowedDBs = ['MONGODB', 'MYSQLDB', 'PGNATIVE']
-    this.#dbTypes = checkTypes(this.#allowedDBs, requiredDBtypes)
+    this.allowedDBs = ['MONGODB', 'MYSQLDB', 'PGNATIVE']
+    this.dbTypes = checkTypes(this.allowedDBs, requiredDBtypes)
 
     // await test()
 
-    this.#supportedDBs = await getSupportedDBs(this.#dbTypes)
+    this.supportedDBs = await getSupportedDBs(this.dbTypes)
   }
 
   validateDBType = (dbType) => {
-    return this.#dbTypes.includes(dbType)
+    return this.dbTypes.includes(dbType)
   }
 
   getDBManager = (dbType) => {
     if (this.validateDBType(dbType)) {
-      return this.#supportedDBs[dbType]
+      return this.supportedDBs[dbType]
     } else {
       return new Error('Unsupported DB type')
     }
   }
 }
+
+// for (let dbType of dbTypes) {
+// dbTypes.map(async (dbType) => {
+//   module = await import(supportedDBFiles[dbType].managerFile)
+//   supportedDBs[dbType] = module.default
+// })
+// switch (dbType) {
+//   case 'dbType':
+//     module = await import(supportedDBFiles[dbType].managerFile)
+//     console.log(module.default)
+//     supportedDBs[dbType] = module.default
+//     break
+//   default:
+//     throw new Error('Unsupported DB type')
+// }
+// })
+
+// switch (dbType) {
+//   case 'MONGODB':
+//     // def = await import('./Managers/MongoDBManager.js')
+//     // supportedDBs[dbType] = new def.default
+
+//     // def = await import('./Managers/MongoDBManager.js')
+//     // supportedDBs[dbType] = new def.default()
+
+//     // const { default: MongoDBManager } = await import(
+//     //   './Managers/MongoDBManager.js'
+//     // )
+//     // supportedDBs[dbType] = new MongoDBManager()
+
+//     import('./Managers/MongoDBManager.js')
+//       .then((module) => {
+//         supportedDBs[dbType] = module.default
+//       })
+//       .catch((err) => {
+//         console.log(err)
+//       })
+//     break
+//   case 'MYSQLDB':
+//     // def = await import('./Managers/MySql2DBManager.js')
+//     // supportedDBs[dbType] = new def.default
+
+//     // def = await import('./Managers/MySql2DBManager.js')
+//     // supportedDBs[dbType] = new def.default()
+
+//     // const { default: MySql2DBManager } = await import(
+//     //   './Managers/MySql2DBManager.js'
+//     // )
+//     // supportedDBs[dbType] = new MySql2DBManager()
+
+//     import('./Managers/MySql2DBManager.js')
+//       .then((module) => {
+//         supportedDBs[dbType] = module.default
+//       })
+//       .catch((err) => {
+//         console.log(err)
+//       })
+//     break
+//   // case 'PGNATIVE':
+//   //   import('./Managers/PostgresDBManager.js').then((module) => {
+//   //     supportedDBs[dbType] = module.default
+//   //   })
+//   //   break
+//   default:
+//     new Error('Unsupported DB type')
+// }
