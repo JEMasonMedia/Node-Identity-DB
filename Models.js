@@ -2,9 +2,10 @@ const models = {
   users: {
     _id: {
       key: 'primary',
-      type: 'string',
+      type: 'int',
       unique: true,
       nullable: false,
+      autoIncrement: true,
     },
     name: {
       type: 'string',
@@ -22,9 +23,10 @@ const models = {
   items: {
     _id: {
       key: 'primary',
-      type: 'string',
+      type: 'int',
       unique: true,
       nullable: false,
+      autoIncrement: true,
     },
     name: {
       type: 'string',
@@ -33,6 +35,10 @@ const models = {
     description: {
       type: 'string',
       nullable: true,
+    },
+    price: {
+      type: 'double',
+      nullable: false,
     },
     quantity: {
       type: 'int',

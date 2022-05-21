@@ -1,137 +1,100 @@
+import wtf from 'wtfnode'
 import './ancillaryImports.js'
 import NIDB from './Node-Identity-DB/NIDB.js'
-import modelManager from './Node-Identity-DB/model_conversions/modelManager.js'
 import DBconnections from './DBconnections.js'
 import Models from './Models.js'
 
-const dbConnections = new NIDB()
+let dbConnections = new NIDB()
 
-dbConnections
-  .useDbTypes(['MONGODB', 'MYSQLDB'])
-  .useDatabase(DBconnections['users'])
-  .useModel(Models['users'])
-  .useDatabase(DBconnections['items'])
-  .useModel(Models['items'])
-  .onInitialized(5000, (err, dbConns, models) => {
+const setupConnections = async () => {
+  await dbConnections.useDatabase(DBconnections['users'])
+  dbConnections.useModel(Models['users'])
+  await dbConnections.useDatabase(DBconnections['items'])
+  dbConnections.useModel(Models['items'])
+
+  // await dbConnections.useDatabases([
+  //   DBconnections['users'],
+  //   DBconnections['items'],
+  // ])
+  // dbConnections.useModels([Models['users'], Models['items']])
+
+  dbConnections.onInitialized((err, dbConns, models) => {
     if (err) {
       console.log(err)
     } else {
-      console.log(
-        `The database connections: [${dbConns}], have been established.`.red
-      )
-      console.log(`The models: [${models}], have been instantiated.`.cyan)
+      if (dbConns?.length) {
+        console.log(
+          `These database connections have been established: `.red,
+          dbConns
+        )
+        console.log(`These models have been established: `.cyan, models)
+      } else {
+        console.log(`No database connections have been established.`.red)
+        console.log(`No models have been established.`.cyan)
+      }
     }
   })
 
-setTimeout(() => {
   // console.log(dbConnections)
 
-  let test = dbConnections.hasActiveConnections()
+  let res
 
-  dbConnections.closeConnections(null, (err, dbList) => {
-    if (!err && dbList) {
-      console.log(`Database connections closed:`.blue, dbList)
-    } else {
-      console.log(err)
-    }
+  res = await dbConnections.tableExists({
+    whichConnection: 'users',
+    modelName: 'users',
   })
-}, 1000)
+  console.log('first exists users', res)
 
-// dbConnections
-//   .useDatabases(
-//     [DBconnections['users'], DBconnections['items']],
-//     DBconnections.callBack
-//   )
-//   .useModels([Models['users'], Models['items']], Models.callBack)
+  if (!res) {
+    res = await dbConnections.createTable({
+      whichConnection: 'users',
+      modelName: 'users',
+    })
+    console.log('creation users', res)
+  }
 
-// dbConnections
-// .useDatabase(DBconnections['users'], DBconnections.callBack)
-// .useDatabase(DBconnections['items'], DBconnections.callBack)
-// .useModel(Models['users'], Models.callBack)
-// .useModel(Models['items'], Models.callBack)
+  res = await dbConnections.tableExists({
+    whichConnection: 'users',
+    modelName: 'users',
+  })
+  console.log('second exists users', res)
 
-// dbConnections
-//   .useDatabase(DBconnections['users'], DBconnections.callBack)
-//   .useModel(Models['users'], Models.callBack)
-// dbConnections
-//   .useDatabase(DBconnections['items'], DBconnections.callBack)
-//   .useModel(Models['items'], Models.callBack)
+  res = await dbConnections.tableExists({
+    whichConnection: 'items',
+    modelName: 'items',
+  })
+  console.log('items', res)
 
-// dbConnections.useModel(Models['users'], Models.callBack)
-// dbConnections.useModel(Models['items'], Models.callBack)
+  if (!res) {
+    res = await dbConnections.createTable({
+      whichConnection: 'items',
+      modelName: 'items',
+    })
+    console.log('items', res)
+  }
+}
 
-//.then(async (res) => {
-// if (!res) {
-//   console.log('Error initializing NIDB')
-// } else {
-//   console.log('NIDB initialized')
-//   await dbConnections.useDatabase(
-//     DBconnections['users'],
-//     DBconnections.callBack
-//   )
-// await dbConnections.useDatabase(
-//   DBconnections['items'],
-//   DBconnections.callBack
-// )
+await setupConnections()
 
-// await dbConnections.closeConnections(null, (err, dbList) => {
-//   if (!err && dbList) {
-//     console.log(`Database connections closed:`.blue, dbList)
-//   } else {
-//     console.log(err)
-//   }
-// })
-// }
-// })
+// setTimeout(() => {
+//   console.log(dbConnections)
+// }, 1000)
 
-// const init = async () => {
-// establish database connections
+setTimeout(async () => {
+  if (dbConnections.hasActiveConnections()) {
+    await dbConnections.closeConnections(null, (err, dbList) => {
+      if (!err && dbList) {
+        console.log(`Database connections closed:`.blue, dbList)
+      } else {
+        console.log(err)
+      }
+    })
+  }
+}, 3000)
 
-// if (dbConnections.init() !== true) {
-//   console.log('Error initializing NIDB')
-// }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// await dbConnections.useDatabases(
-//   [DBconnections['users'], DBconnections['items']],
-//   DBconnections.callBack
-// )
-
-// connections['users'] = await NIDB.useDatabase(DBconnections['users'])
-// await NIDB.useDatabase(DBconnections['items'])
-
-// establish model connections
-// arguments: model
-// dbConnections.useModels([Models['users'], Models['items']], Models.callBack)
-
-// await modelManager.createModifyTable(
-//   dbConnections.databaseConnections['users'],
-//   'users',
-//   (err, model) => {
-//     if (!err && model) {
-//       console.log(
-//         `The collection: '${model.modelName}', on connection: '${model.connectionName}', was modified successfully!`
-//           .magenta
-//       )
-//     } else {
-//       console.log(err)
-//     }
-//   }
-// )
-
-// await modelManager.createModifyTable(
-//   dbConnections.databaseConnections['items'],
-//   'items',
-//   (err, model) => {
-//     if (!err && model) {
-//       console.log(
-//         `The collection: '${model.modelName}', on connection: '${model.connectionName}', was modified successfully!`
-//           .magenta
-//       )
-//     } else {
-//       console.log(err)
-//     }
-//   }
-// )
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // const user = DBconnections['users'].select('*').where({ id: 1 }).first()
 // const item = DBconnections['items'].select('*').where({ id: 1 }).first()
@@ -139,15 +102,7 @@ setTimeout(() => {
 // console.log(NIDB.databaseConnections['users'].models['users'].model.getModel())
 // console.log(NIDB.databaseConnections['items'].models['items'].model.getModel())
 
-// await dbConnections.closeConnections(null, (err, dbList) => {
-//   if (!err && dbList) {
-//     console.log(`Database connections closed:`.blue, dbList)
-//   } else {
-//     console.log(err)
-//   }
-// })
-
-// console.log(NIDB.databaseConnections)
-// }
-
-// init()
+// testing closed connections
+// setTimeout(async () => {
+//   wtf.dump()
+// }, 4000)

@@ -1,10 +1,7 @@
 import { MongoClient } from 'mongodb'
-import modelManager from '../../model_conversions/modelManager.js'
+import modelManager from '../../modelConversions/modelManager.js'
 
 export default class MongoDBManager {
-  // constructor() {
-  //   this.dbType = 'MONGODB'
-  // }
   static dbType = 'MONGODB'
 
   static connectDB = async (connectionConfig, additionalConfig) => {
@@ -38,60 +35,84 @@ export default class MongoDBManager {
 
   static disconnectDB = async (dbConn) => {
     try {
-      await dbConn.connection.close()
-      return dbConn.connectionName
-    } catch (err) {
-      return { err }
-    }
-  }
-
-  static createModifyTable = async (dbConn, modelName) => {
-    try {
-      const collection = await dbConn.connection.db().collection(modelName)
-      const numDocs = await collection.countDocuments()
-      const fields = Object.keys(dbConn.models[modelName].model)
-      const model = dbConn.models[modelName].model
-      const pageSize = 100
-      const numPages = Math.ceil(numDocs / pageSize)
-
-      for (let i = 0; i < numPages; i++) {
-        const cursor = await collection
-          .find({})
-          .skip(i * pageSize)
-          .limit(pageSize)
-        const docs = await cursor.toArray()
-        for (let j = 0; j < docs.length; j++) {
-          const doc = docs[j]
-          const docKeys = Object.keys(doc)
-          let trigger = false
-          for (let k = 0; k < fields.length; k++) {
-            const key = fields[k]
-            if (!docKeys.includes(key)) {
-              doc[key] = modelManager.getDefaultValue(
-                model[key].type,
-                model[key]
-              )
-              trigger = true
-            }
-          }
-          if (trigger)
-            await collection.updateOne({ _id: doc._id }, { $set: doc })
-          trigger = false
-
-          for (let k = 0; k < docKeys.length; k++) {
-            const key = docKeys[k]
-            if (!fields.includes(key)) {
-              delete doc[key]
-              let t = { [key]: 1 }
-              await collection.updateMany({}, { $unset: { [key]: 1 } })
-            }
-          }
-        }
-      }
-
+      await dbConn.close()
       return true
     } catch (err) {
       return { err }
     }
   }
+
+  static tableExists = async (dbConn, model) => {
+    try {
+      const exists = await dbConn
+        .db()
+        .listCollections({ name: model.modelName })
+        .toArray()
+
+      return exists.length > 0
+    } catch (err) {
+      return { err }
+    }
+  }
+
+  static createTable = async (dbConn, model) => {
+    try {
+      await dbConn.db().createCollection(model.modelName)
+      return true
+    } catch (err) {
+      if (err.toString().includes('Collection already exists'))
+        return { err: 'Table already exists' }
+      return { err }
+    }
+  }
+
+  // static createModifyTable = async (dbConn, modelName) => {
+  //   try {
+  //     const collection = await dbConn.connection.db().collection(modelName)
+  //     const numDocs = await collection.countDocuments()
+  //     const fields = Object.keys(dbConn.models[modelName].model)
+  //     const model = dbConn.models[modelName].model
+  //     const pageSize = 100
+  //     const numPages = Math.ceil(numDocs / pageSize)
+
+  //     for (let i = 0; i < numPages; i++) {
+  //       const cursor = await collection
+  //         .find({})
+  //         .skip(i * pageSize)
+  //         .limit(pageSize)
+  //       const docs = await cursor.toArray()
+  //       for (let j = 0; j < docs.length; j++) {
+  //         const doc = docs[j]
+  //         const docKeys = Object.keys(doc)
+  //         let trigger = false
+  //         for (let k = 0; k < fields.length; k++) {
+  //           const key = fields[k]
+  //           if (!docKeys.includes(key)) {
+  //             doc[key] = modelManager.getDefaultValue(
+  //               model[key].type,
+  //               model[key]
+  //             )
+  //             trigger = true
+  //           }
+  //         }
+  //         if (trigger)
+  //           await collection.updateOne({ _id: doc._id }, { $set: doc })
+  //         trigger = false
+
+  //         for (let k = 0; k < docKeys.length; k++) {
+  //           const key = docKeys[k]
+  //           if (!fields.includes(key)) {
+  //             delete doc[key]
+  //             let t = { [key]: 1 }
+  //             await collection.updateMany({}, { $unset: { [key]: 1 } })
+  //           }
+  //         }
+  //       }
+  //     }
+
+  //     return true
+  //   } catch (err) {
+  //     return { err }
+  //   }
+  // }
 }

@@ -26,48 +26,28 @@
  */
 
 import helpers from './helpers/helpers.js'
-import connectionManager from './db_connections/connectionManager.js'
-import modelManager from './model_conversions/modelManager.js'
-import connection from './db_connections/connection.js'
+import queryBuilder from './queryBuilders/queryBuilder.js'
+import connection from './dbConnections/connection.js'
+import modelManager from './modelConversions/modelManager.js'
 
-export default class NIDB {
+export default class NIDB extends queryBuilder {
   constructor() {
+    super()
     this.databaseConnections = {}
     this.loadedConnectionManagers = false
     this.loadedDatabases = false
-  }
-
-  useDbTypes = (requiredDBtypes) => {
-    try {
-      this.connectionManager = new connectionManager(requiredDBtypes)
-      this.connectionManager
-        .init()
-        .then(() => {
-          console.log(
-            `Loaded connection managers for: ${requiredDBtypes}`.yellow
-          )
-          this.loadedConnectionManagers = true
-          return this
-        })
-        .catch((err) => {
-          console.log(err)
-          return false
-        })
-
-      return this
-    } catch (err) {
-      return false
-    }
-  }
-
-  useDatabases = (dbConnections, callBack) => {
-    dbConnections.forEach((dbConnection) => {
-      this.useDatabase(dbConnection, callBack)
-    })
     return this
   }
 
-  useDatabase = (
+  useDatabases = async (dbConnections, callBack) => {
+    for (const dbConnection in dbConnections) {
+      await this.useDatabase(dbConnections[dbConnection], callBack)
+    }
+    this.loadedDatabases = true
+    return this
+  }
+
+  useDatabase = async (
     { connectionName, databaseType, connectionConfig, additionalConfig },
     callBack = false
   ) => {
@@ -82,30 +62,17 @@ export default class NIDB {
             additionalConfig
           ),
         }
-        helpers
-          .waitFor((_) => this.loadedConnectionManagers === true)
-          .then((_) => {
-            this.connectionManager
-              .connectDB(databaseType, connectionConfig, additionalConfig)
-              .then((client) => {
-                if (client.err) {
-                  delete this.databaseConnections[connectionName]
-                  if (callBack) callBack(client)
-                } else {
-                  this.databaseConnections[connectionName].connection = client
-                  this.databaseConnections[connectionName].isConnected = true
 
-                  // this.loadedDatabases = true
-                  if (callBack)
-                    callBack(null, this.databaseConnections[connectionName])
-                }
+        let res = await this.databaseConnections[connectionName].connectDB()
+        // console.log(this.databaseConnections[connectionName])
 
-                return this
-              })
-          })
-          .catch(() => {
-            if (callBack) callBack({ err: 'Invalid arguments' })
-          })
+        if (!res) {
+          delete this.databaseConnections[connectionName]
+          if (callBack) callBack(client)
+        } else {
+          this.databaseConnections[connectionName].isConnected = true
+          if (callBack) callBack(null, this.databaseConnections[connectionName])
+        }
       } catch (err) {
         if (callBack) callBack({ err: 'Invalid arguments' })
       }
@@ -115,10 +82,10 @@ export default class NIDB {
     return this
   }
 
-  useModels = (models, callback) => {
-    models.forEach((model) => {
-      this.useModel(model, callback)
-    })
+  useModels = (models, callBack) => {
+    for (const model in models) {
+      this.useModel(models[model], callBack)
+    }
     return this
   }
 
@@ -128,32 +95,14 @@ export default class NIDB {
   ) => {
     try {
       if (connectionName && modelName && model) {
-        helpers
-          .waitFor(
-            (_) => this.databaseConnections[connectionName].isConnected === true
+        this.databaseConnections[connectionName].models[modelName] =
+          new modelManager(
+            this.databaseConnections[connectionName].databaseType,
+            modelName,
+            connectionName,
+            model,
+            additionalConfig
           )
-          .then((_) => {
-            modelManager.validateModel(model, (err, valid) => {
-              if (!err && valid) {
-                this.databaseConnections[connectionName].models[modelName] =
-                  new modelManager(
-                    this.databaseConnections[connectionName].databaseType,
-                    modelName,
-                    connectionName,
-                    model,
-                    additionalConfig
-                  )
-
-                if (callBack)
-                  callBack(
-                    null,
-                    this.databaseConnections[connectionName].models[modelName]
-                  )
-              } else {
-                if (callBack) callBack({ err })
-              }
-            })
-          })
       } else {
         if (callBack) callBack({ err: 'Invalid arguments' })
       }
@@ -163,54 +112,37 @@ export default class NIDB {
     return this
   }
 
-  onInitialized = (timeOut, callBack) => {
+  onInitialized = async (callBack) => {
     const dbConns = Object.keys(this.databaseConnections)
     let models = []
-    let timeout = Date.now()
+    let allSet = null
 
     try {
       if (dbConns.length > 0) {
-        helpers
-          .waitFor((_) => {
-            let allSet = null
-            dbConns.forEach((dbConn) => {
-              if (allSet === false) {
-                allSet = false
-              } else {
-                if (this.databaseConnections[dbConn].isConnected === true) {
-                  allSet = true
-                } else {
-                  allSet = false
-                }
-              }
-            })
-
-            let t = Date.now() - timeout
-            if (t > timeOut) {
-              throw new Error('Timeout')
+        dbConns.forEach((dbConn) => {
+          if (allSet === false) {
+            allSet = false
+          } else {
+            if (this.databaseConnections[dbConn].isConnected === true) {
+              allSet = true
+            } else {
+              allSet = false
             }
-            return allSet
-          })
-          .then((_) => {
-            dbConns.forEach((dbConn) => {
-              models = [
-                ...models,
-                ...Object.keys(this.databaseConnections[dbConn].models),
-              ]
-            })
-            callBack(null, dbConns, models)
-          })
-          .catch((err) => {
-            if (err === 'Timeout') callBack({ err: 'Timeout' })
-            callBack({ err })
-          })
+          }
+        })
+        dbConns.forEach((dbConn) => {
+          models = [
+            ...models,
+            ...Object.keys(this.databaseConnections[dbConn].models),
+          ]
+        })
+        callBack(null, dbConns, models)
       } else {
         callBack({ err: 'No database connections initialized' })
       }
     } catch (err) {
       callBack({ err })
     }
-
     return this
   }
 
@@ -226,37 +158,22 @@ export default class NIDB {
 
   hasActiveConnections = () => {
     const dbConns = Object.keys(this.databaseConnections)
-    let timeout = Date.now()
+    let allSet = null
 
     try {
       if (dbConns.length > 0) {
-        helpers
-          .waitFor((_) => {
-            let allSet = null
-            dbConns.forEach((dbConn) => {
-              if (allSet === false) {
-                allSet = false
-              } else {
-                if (this.databaseConnections[dbConn].isConnected === true) {
-                  allSet = true
-                } else {
-                  allSet = false
-                }
-              }
-            })
-
-            let t = Date.now() - timeout
-            if (t > 5000) {
-              throw new Error('Timeout')
+        dbConns.forEach((dbConn) => {
+          if (allSet === false) {
+            allSet = false
+          } else {
+            if (this.databaseConnections[dbConn].isConnected === true) {
+              allSet = true
+            } else {
+              allSet = false
             }
-            return allSet
-          })
-          .then((_) => {
-            return true
-          })
-          .catch(() => {
-            return false
-          })
+          }
+        })
+        return allSet
       } else {
         return false
       }
@@ -265,9 +182,9 @@ export default class NIDB {
     }
   }
 
-  closeConnections = (dbs, callBack = false) => {
+  closeConnections = async (dbs, callBack = false) => {
     let list = []
-    let results = null
+    let res = null
     let errors = []
 
     try {
@@ -285,18 +202,14 @@ export default class NIDB {
       }
 
       for (let i = 0; i < list.length; i++) {
-        results = this.connectionManager
-          .disconnectDB(
-            this.databaseConnections[list[i]].databaseType,
-            this.databaseConnections[list[i]]
-          )
-          .then(() => {
-            if (results?.err)
-              errors.push({ connectionName: list[i], err: results.err })
-          })
-          .catch((err) => {
-            errors.push({ connectionName: list[i], err: err })
-          })
+        res = await this.databaseConnections[list[i]].disconnectDB()
+
+        if (res?.err) errors.push({ connectionName: list[i], err: res.err })
+
+        if (res) {
+          this.databaseConnections[list[i]].isConnected = false
+          delete this.databaseConnections[list[i]]
+        }
       }
 
       if (errors.length > 0) {

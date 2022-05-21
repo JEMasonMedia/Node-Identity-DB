@@ -27,59 +27,81 @@ export default class MySql2DBManager {
 
   static disconnectDB = async (dbConn) => {
     try {
-      // await dbConn.connection.destroy()
-      await dbConn.connection.end()
-      return dbConn.connectionName
+      await dbConn.end()
+      await dbConn.release()
+      return true
     } catch (err) {
       return { err }
     }
   }
 
-  static createModifyTable = async (dbConn, modelName) => {
+  static tableExists = async (dbConn, model) => {
     try {
-      // const query = `SHOW TABLES LIKE "items2"`
-      //const q2 = `SELECT * FROM information_schema.tables WHERE table_schema = '${dbConn.connectionConfig.database}' AND table_name = '${modelName}' LIMIT 1`
-      const tableExistsQuery = dbConn.tableExists(modelName)
-      // console.log(await dbConn.connection.query(query))
-      const tableExists = await dbConn.connection.query(tableExistsQuery)
-      // console.log(tableExists)
+      const query = `SHOW TABLES LIKE '${model.modelName}'`
+      const numDocs = await dbConn.connection.promise().query(query)
+      return numDocs[0].length > 0 ? true : false
+    } catch (err) {
+      return { err }
+    }
+  }
 
-      console.log(dbConn.createTable(modelName))
+  static createTable = async (dbConn, model) => {
+    // console.log(model)
+    // const createTableQuery = `CREATE TABLE ${modelName} (
+    //   _id VARCHAR(255) PRIMARY KEY,
+    //   name VARCHAR(255) NOT NULL,
+    //   description VARCHAR(255) NULL,
+    //   quantity INT NOT NULL
+    // )`
 
-      // if (tableExists[0].length > 0) {
-      //   //nothing to do
-      // } else {
-      //   const createTableQuery = `CREATE TABLE ${modelName} (
-      //     _id VARCHAR(255) PRIMARY KEY,
-      //     name VARCHAR(255) NOT NULL,
-      //     description VARCHAR(255) NULL,
-      //     quantity INT NOT NULL
-      //   )`
-      //   await dbConn.connection.query(createTableQuery)
-      // }
+    return true
+  }
 
-      // console.log(await dbConn.connection.schema)
-      // console.log(await dbConn.connection.table).table(dbConn.connectionName)
-      // const test = await dbConn.connection
-      //   .raw('SELECT VERSION()')
-      //   .then((version) => console.log(version[0][0]))
-      //   .catch((err) => {
-      //     console.log(err)
-      //     throw err
-      //   })
-      // console.log(test)
+  // static createModifyTable = async (dbConn, modelName) => {
+  //   try {
+  //     // const query = `SHOW TABLES LIKE "items2"`
+  //     //const q2 = `SELECT * FROM information_schema.tables WHERE table_schema = '${dbConn.connectionConfig.database}' AND table_name = '${modelName}' LIMIT 1`
+  //     const tableExistsQuery = dbConn.tableExists(modelName)
+  //     // console.log(await dbConn.connection.query(query))
+  //     const tableExists = await dbConn.connection.query(tableExistsQuery)
+  //     // console.log(tableExists)
 
-      // await dbConn.connection.schema.hasTable(modelName).then((exists) => {
-      //   if (!exists) {
-      //     return dbConn.schema.createTable(modelName, (table) => {
-      //       table.increments('_id').primary()
-      //       table.string('name').notNullable()
-      //       table.string('description').nullable()
-      //       table.string('quantity').notNullable()
-      //     })
-      //   }
-      // })
-      /*
+  //     console.log(dbConn.createTable(modelName))
+
+  // if (tableExists[0].length > 0) {
+  //   //nothing to do
+  // } else {
+  //   const createTableQuery = `CREATE TABLE ${modelName} (
+  //     _id VARCHAR(255) PRIMARY KEY,
+  //     name VARCHAR(255) NOT NULL,
+  //     description VARCHAR(255) NULL,
+  //     quantity INT NOT NULL
+  //   )`
+  //   await dbConn.connection.query(createTableQuery)
+  // }
+
+  // console.log(await dbConn.connection.schema)
+  // console.log(await dbConn.connection.table).table(dbConn.connectionName)
+  // const test = await dbConn.connection
+  //   .raw('SELECT VERSION()')
+  //   .then((version) => console.log(version[0][0]))
+  //   .catch((err) => {
+  //     console.log(err)
+  //     throw err
+  //   })
+  // console.log(test)
+
+  // await dbConn.connection.schema.hasTable(modelName).then((exists) => {
+  //   if (!exists) {
+  //     return dbConn.schema.createTable(modelName, (table) => {
+  //       table.increments('_id').primary()
+  //       table.string('name').notNullable()
+  //       table.string('description').nullable()
+  //       table.string('quantity').notNullable()
+  //     })
+  //   }
+  // })
+  /*
       const collection = await dbConn.connection.db().collection(modelName)
       const numDocs = await collection.countDocuments()
       const fields = Object.keys(dbConn.models[modelName].model)
@@ -122,9 +144,9 @@ export default class MySql2DBManager {
         }
       }
 */
-      return true
-    } catch (err) {
-      return { err }
-    }
-  }
+  //     return true
+  //   } catch (err) {
+  //     return { err }
+  //   }
+  // }
 }

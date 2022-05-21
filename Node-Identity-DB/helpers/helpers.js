@@ -48,5 +48,14 @@ helpers.waitFor = (conditionFunction) => {
 helpers.asyncWait = async (wait) =>
   new Promise((resolve) => setTimeout(resolve, wait))
 
+helpers.genericTypes = {
+  string: '',
+  number: 0,
+  double: 0.0,
+  boolean: false,
+  array: [],
+  object: {},
+}
+
 // Export the module
 export default helpers

@@ -1,7 +1,4 @@
-// import supportedDBs from '../supportedDBs/supportedDBs.js'
-// import NIDB from '../NIDB.js'
-import connectionManager from '../db_connections/connectionManager.js'
-import queryBuilder from '../query_builders/queryBuilder.js'
+import helpers from '../helpers/helpers.js'
 
 export default class modelManager {
   constructor(
@@ -14,8 +11,18 @@ export default class modelManager {
     this.databaseType = databaseType
     this.modelName = modelName
     this.connectionName = connectionName
-    this.model = model
     this.additionalConfig = additionalConfig
+
+    try {
+      const v = this.validateModel(model)
+      if (v === true) {
+        this.model = model
+      } else {
+        throw new Error('Invalid model')
+      }
+    } catch (err) {
+      return false
+    }
   }
 
   // C R U D
@@ -31,32 +38,34 @@ export default class modelManager {
   //   - For runtime use such as adding and subtracting columns for both SQL and NoSQL databases
   // This can be a very dangerous function and should be used very carefully during runtime and potentially only be used for testing and development
 
-  static createModifyTable = async (dbConn, modelName, callBack) => {
-    if (dbConn && modelName && callBack) {
-      try {
-        const result = await connectionManager.createModifyTable(
-          dbConn.databaseType,
-          dbConn,
-          modelName
-        )
-        if (result.err) {
-          callBack(result)
-        } else {
-          callBack(null, dbConn.models[modelName])
-        }
-      } catch (err) {
-        callBack(err)
-      }
-    } else {
-      callBack({ err: 'Invalid arguments' })
-    }
-  }
+  // createModifyTable = async (dbConn, modelName, callBack) => {
+  // console.log(this)
+  // if (dbConn && modelName && callBack) {
+  //   try {
+  //     const result = await connectionManager.createModifyTable(
+  //       dbConn.databaseType,
+  //       dbConn,
+  //       modelName
+  //     )
+  //     if (result.err) {
+  //       callBack(result)
+  //     } else {
+  //       callBack(null, dbConn.models[modelName])
+  //     }
+  //   } catch (err) {
+  //     callBack(err)
+  //   }
+  // } else {
+  //   callBack({ err: 'Invalid arguments' })
+  // }
+  // }
 
   // Validate the model
   // Ensures basic model structure
   // Needs to be fleshed out
-  static validateModel = (model, callBack) => {
-    if (model && callBack) {
+  validateModel = (model, callBack) => {
+    if (model) {
+      const genericTypes = Object.keys(helpers.genericTypes)
       const modelKeys = Object.keys(model)
       const modelKeysLength = modelKeys.length
 
@@ -73,20 +82,13 @@ export default class modelManager {
               const innerKeys = Object.keys(model[modelKey])
               const innerKeysLength = innerKeys.length
 
-              for (let i; i < innerKeysLength; i++) {
+              for (let i = 0; i < innerKeysLength; i++) {
                 const innerKey = innerKeys[i]
                 const innerKeyType = typeof model[modelKey][innerKey]
-                const innerKeyTypeValid = [
-                  'string',
-                  'number',
-                  'boolean',
-                  'array',
-                  'object',
-                ]
 
-                if (!innerKeyTypeValid.contains(innerKeyType)) {
-                  callBack(`Invalid type for ${innerKey}`, false)
-                  return false
+                if (!genericTypes.includes(innerKeyType)) {
+                  // callBack(`Invalid type for ${innerKey}`, false)
+                  throw new Error(`Invalid type for ${innerKey}`)
                 }
               }
 
@@ -94,41 +96,34 @@ export default class modelManager {
               if (modelKeysIndex < modelKeysLength) {
                 validateModel()
               } else {
-                callBack(null, true)
+                return true
               }
             } else {
-              callBack(`${modelKey} is empty`)
+              throw new Error(`${modelKey} is empty`)
             }
           } else {
-            callBack(`${modelKey} is not a object`)
+            throw new Error(`${modelKey} is not a object`)
           }
         }
 
         validateModel()
       } else {
-        callBack('Model is empty')
+        throw new Error('Model is empty')
       }
     } else {
-      callBack('Invalid arguments')
+      throw new Error('Invalid arguments')
     }
+    return true
   }
 
-  static getDefaultValue = (type, modelKey) => {
+  getDefaultValue = (type, modelKey) => {
     try {
       return modelKey.defaultValue
         ? modelKey.defaultValue
-        : this.genericTypes[type]
+        : helpers.genericTypes[type]
     } catch (error) {
       throw new Error(`Unknown type: ${modelKey}`)
     }
-  }
-
-  genericTypes = {
-    string: '',
-    number: 0,
-    boolean: false,
-    array: [],
-    object: {},
   }
 
   getModel = () => {

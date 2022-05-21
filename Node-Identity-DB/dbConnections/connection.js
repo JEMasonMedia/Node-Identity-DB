@@ -1,6 +1,6 @@
-import queryBuilder from '../query_builders/queryBuilder.js'
+import connectionManager from './connectionManager.js'
 
-export default class connection extends queryBuilder {
+export default class connection extends connectionManager {
   constructor(
     connectionName,
     databaseType,
