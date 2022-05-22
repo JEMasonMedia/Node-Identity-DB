@@ -30,13 +30,14 @@ import queryBuilder from './queryBuilders/queryBuilder.js'
 import connection from './dbConnections/connection.js'
 import modelManager from './modelConversions/modelManager.js'
 
-export default class NIDB extends queryBuilder {
+export default class NIDB {
   constructor() {
-    super()
     this.databaseConnections = {}
-    this.loadedConnectionManagers = false
-    this.loadedDatabases = false
     return this
+  }
+
+  queryBuilder = () => {
+    return new queryBuilder(this.databaseConnections)
   }
 
   useDatabases = async (dbConnections, callBack) => {
@@ -64,7 +65,6 @@ export default class NIDB extends queryBuilder {
         }
 
         let res = await this.databaseConnections[connectionName].connectDB()
-        // console.log(this.databaseConnections[connectionName])
 
         if (!res) {
           delete this.databaseConnections[connectionName]

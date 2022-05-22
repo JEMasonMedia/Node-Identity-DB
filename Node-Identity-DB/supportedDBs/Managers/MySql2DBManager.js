@@ -1,11 +1,10 @@
 import mysql from 'mysql2/promise'
 import knex from 'knex'
+import MySql2DBTranslator from '../Translators/MySql2DBTranslator.js'
 
 export default class MySql2DBManager {
-  // constructor() {
-  //   this.dbType = 'MYSQLDB'
-  // }
   static dbType = 'MYSQLDB'
+  static translator = new MySql2DBTranslator()
 
   static connectDB = async (connectionConfig, additionalConfig) => {
     try {
@@ -35,6 +34,23 @@ export default class MySql2DBManager {
     }
   }
 
+  static raw = async (dbConn, query) => {
+    // NOT IMPLEMENTED
+    // try {
+    //   return await this.databaseConnections[
+    //     dbConn_table_query.whichConnection
+    //   ].connectionManager.raw(
+    //     this.databaseConnections[dbConn_table_query.whichConnection].connection,
+    //     this.databaseConnections[dbConn_table_query.whichConnection].models[
+    //       dbConn_table_query.modelName
+    //     ],
+    //     dbConn_table_query.query
+    //   )
+    // } catch (err) {
+    //   return { err }
+    // }
+  }
+
   static tableExists = async (dbConn, model) => {
     try {
       const query = `SHOW TABLES LIKE '${model.modelName}'`
@@ -46,15 +62,14 @@ export default class MySql2DBManager {
   }
 
   static createTable = async (dbConn, model) => {
-    // console.log(model)
-    // const createTableQuery = `CREATE TABLE ${modelName} (
-    //   _id VARCHAR(255) PRIMARY KEY,
-    //   name VARCHAR(255) NOT NULL,
-    //   description VARCHAR(255) NULL,
-    //   quantity INT NOT NULL
-    // )`
+    try {
+      const query = this.translator.getCreateTableQuery(model)
 
-    return true
+      await dbConn.connection.promise().query(query.sql)
+      return true
+    } catch (err) {
+      return { err }
+    }
   }
 
   // static createModifyTable = async (dbConn, modelName) => {

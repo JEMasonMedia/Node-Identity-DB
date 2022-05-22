@@ -55,6 +55,10 @@ helpers.genericTypes = {
   boolean: false,
   array: [],
   object: {},
+  date: null,
+  time: null,
+  dateTime: null,
+  timeStamp: null,
 }
 
 // Export the module

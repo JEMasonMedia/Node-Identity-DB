@@ -36,37 +36,32 @@ const setupConnections = async () => {
   })
 
   // console.log(dbConnections)
+  // console.log(dbConnections.queryBuilder().select())
 
   let res
 
-  res = await dbConnections.tableExists({
-    whichConnection: 'users',
-    modelName: 'users',
-  })
-  console.log('first exists users', res)
+  // res = await dbConnections.queryBuilder().tableExists({
+  //   whichConnection: 'users',
+  //   modelName: 'users',
+  // })
+  // console.log('users', res)
 
-  if (!res) {
-    res = await dbConnections.createTable({
-      whichConnection: 'users',
-      modelName: 'users',
-    })
-    console.log('creation users', res)
-  }
+  // if (!res) {
+  //   res = await dbConnections.queryBuilder().createTable({
+  //     whichConnection: 'users',
+  //     modelName: 'users',
+  //   })
+  //   console.log('creation users', res)
+  // }
 
-  res = await dbConnections.tableExists({
-    whichConnection: 'users',
-    modelName: 'users',
-  })
-  console.log('second exists users', res)
-
-  res = await dbConnections.tableExists({
+  res = await dbConnections.queryBuilder().tableExists({
     whichConnection: 'items',
     modelName: 'items',
   })
   console.log('items', res)
 
   if (!res) {
-    res = await dbConnections.createTable({
+    res = await dbConnections.queryBuilder().createTable({
       whichConnection: 'items',
       modelName: 'items',
     })

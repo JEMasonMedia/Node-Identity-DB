@@ -1,8 +1,7 @@
 import helpers from '../helpers/helpers.js'
-import createQuery from './createQuery.js'
 
 export default class queryBuilder {
-  constructor() {
+  constructor(databaseConnections) {
     // this.where = null
     // this.orderBy = null
     // this.limit = null
@@ -17,7 +16,31 @@ export default class queryBuilder {
     // this.except = null
     // this.createTable = null
     // this.alterTable = null
-    this.createQuery = new createQuery()
+    // this.#createQuery = new createQuery()
+    this.databaseConnections = databaseConnections
+    return this
+  }
+
+  select = () => {
+    return 'this.select'
+  }
+
+  raw = async (dbConn_table_query) => {
+    // NOT IMPLEMENTED
+    throw new Error('Not implemented')
+    // try {
+    //   return await this.databaseConnections[
+    //     dbConn_table_query.whichConnection
+    //   ].connectionManager.raw(
+    //     this.databaseConnections[dbConn_table_query.whichConnection].connection,
+    //     this.databaseConnections[dbConn_table_query.whichConnection].models[
+    //       dbConn_table_query.modelName
+    //     ],
+    //     dbConn_table_query.query
+    //   )
+    // } catch (err) {
+    //   return { err }
+    // }
   }
 
   tableExists = async (dbConn_table) => {
@@ -41,21 +64,13 @@ export default class queryBuilder {
       if (res.err) return res
       if (res) return { err: 'Table already exists' }
 
-      let query = this.createQuery.createTable(
-        this.databaseConnections[dbConn_table.whichConnection].databaseType,
-        this.databaseConnections[dbConn_table.whichConnection].models[
-          dbConn_table.modelName
-        ]
-      )
-
       return await this.databaseConnections[
         dbConn_table.whichConnection
       ].connectionManager.createTable(
         this.databaseConnections[dbConn_table.whichConnection].connection,
         this.databaseConnections[dbConn_table.whichConnection].models[
           dbConn_table.modelName
-        ],
-        query
+        ]
       )
     } catch (err) {
       return { err }
@@ -63,8 +78,8 @@ export default class queryBuilder {
   }
 
   alterTable = () => {
-    const query = new queryBuilder()
-    query.query.createTable = model
-    return query
+    // const query = new queryBuilder()
+    // query.query.createTable = model
+    // return query
   }
 }

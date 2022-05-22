@@ -9,10 +9,12 @@ const models = {
     },
     name: {
       type: 'string',
+      size: 255,
       nullable: false,
     },
     city: {
       type: 'string',
+      size: 255,
       nullable: true,
     },
     cart: {
@@ -30,10 +32,12 @@ const models = {
     },
     name: {
       type: 'string',
+      size: 255,
       nullable: false,
     },
     description: {
       type: 'string',
+      size: 255,
       nullable: true,
     },
     price: {

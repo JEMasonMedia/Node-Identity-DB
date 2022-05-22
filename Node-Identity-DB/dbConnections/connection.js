@@ -15,5 +15,6 @@ export default class connection extends connectionManager {
     this.connection = null
     this.models = {}
     this.isConnected = false
+    this.connectionManager = null
   }
 }

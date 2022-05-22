@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb'
-import modelManager from '../../modelConversions/modelManager.js'
+import MongoDBTranslator from '../Translators/MongoDBTranslator.js'
 
-export default class MongoDBManager {
+export default class MongoDBManager extends MongoDBTranslator {
   static dbType = 'MONGODB'
 
   static connectDB = async (connectionConfig, additionalConfig) => {
@@ -40,6 +40,23 @@ export default class MongoDBManager {
     } catch (err) {
       return { err }
     }
+  }
+
+  static raw = async (dbConn, query) => {
+    // NOT IMPLEMENTED
+    // try {
+    //   return await this.databaseConnections[
+    //     dbConn_table_query.whichConnection
+    //   ].connectionManager.raw(
+    //     this.databaseConnections[dbConn_table_query.whichConnection].connection,
+    //     this.databaseConnections[dbConn_table_query.whichConnection].models[
+    //       dbConn_table_query.modelName
+    //     ],
+    //     dbConn_table_query.query
+    //   )
+    // } catch (err) {
+    //   return { err }
+    // }
   }
 
   static tableExists = async (dbConn, model) => {
