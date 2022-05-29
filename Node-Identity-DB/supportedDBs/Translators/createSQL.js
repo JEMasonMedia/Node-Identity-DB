@@ -48,6 +48,8 @@ export default class createSQL {
     })
   }
 
+  // will need to account for sql server
+  // possible downgrade to translator as it is a narrow function
   renameField = (model, oldNewName) => {
     return `ALTER TABLE ${model.modelName} RENAME COLUMN ${oldNewName.oldFieldName} TO ${oldNewName.newFieldName}`
   }
