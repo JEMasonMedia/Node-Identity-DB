@@ -1,0 +1,23 @@
+[
+  {
+    "_id": 1,
+    "name": "Bread",
+    "description": "A piece of bread",
+    "price": 2.0,
+    "quantity": 10
+  },
+  {
+    "_id": 2,
+    "name": "Milk",
+    "description": "A bottle of milk",
+    "price": 1.0,
+    "quantity": 10
+  },
+  {
+    "_id": 3,
+    "name": "Eggs",
+    "description": "A dozen eggs",
+    "price": 0.5,
+    "quantity": 10
+  }
+]

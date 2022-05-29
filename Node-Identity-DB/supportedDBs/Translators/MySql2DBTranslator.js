@@ -1,21 +1,25 @@
 import createSQL from './createSQL.js'
 
 export default class MySql2DBTranslator {
-  // constructor() {
-  //   this.createSQL = new createSQL('MySQL')
-  // }
   createSQL = new createSQL('MySQL')
 
-  getCreateTableQuery = (model) => {
-    // let query = `CREATE TABLE ${tableName} (`
-    // let fields = []
-    // for (let field in tableColumns) {
-    //   fields.push(
-    //     `${field} ${tableColumns[field].type}`
-    //   )
-    // }
-    // query += fields.join(', ')
-    // query += ')'
+  getTableExistsQuery = modelName => {
+    return `SHOW TABLES LIKE '${modelName}'`
+  }
+
+  getCreateTableQuery = model => {
     return this.createSQL.createTable(model)
+  }
+
+  getRenameFieldQuery = (model, oldNewName) => {
+    return this.createSQL.renameField(model, oldNewName)
+  }
+
+  getAlterTableQuery = (model, preserveData) => {
+    return this.createSQL.alterTable(model, preserveData)
+  }
+
+  getDropTableQuery = modelName => {
+    return `DROP TABLE ${modelName}`
   }
 }

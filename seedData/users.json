@@ -1,0 +1,32 @@
+[
+  {
+    "_id": 1,
+    "name": "Leanne",
+    "city": "Paris",
+    "cart": ["Bread", "Milk", "Eggs"]
+  },
+  {
+    "_id": 2,
+    "name": "Sophie",
+    "city": "London",
+    "cart": ["Bread", "Milk", "Eggs"]
+  },
+  {
+    "_id": 3,
+    "name": "Jerry",
+    "city": "Dallas",
+    "cart": ["Bread", "Milk", "Eggs"]
+  },
+  {
+    "_id": 4,
+    "name": "Larry",
+    "city": "Kansas City",
+    "cart": ["Bread", "Milk", "Eggs"]
+  },
+  {
+    "_id": 5,
+    "name": "Moe",
+    "city": "Houston",
+    "cart": ["Bread", "Milk", "Eggs"]
+  }
+]

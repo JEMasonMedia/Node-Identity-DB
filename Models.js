@@ -7,10 +7,16 @@ const models = {
       nullable: false,
       autoIncrement: true,
     },
-    name: {
+    first_name: {
       type: 'string',
       size: 255,
       nullable: false,
+    },
+    email: {
+      type: 'string',
+      size: 255,
+      nullable: false,
+      defaultValue: 'example@example.com',
     },
     city: {
       type: 'string',
@@ -64,12 +70,15 @@ export default {
     model: models['items'],
     additionalConfig: {},
   },
+  users_test: {
+    connectionName: 'items',
+    modelName: 'users_test',
+    model: models['users'],
+    additionalConfig: {},
+  },
   callBack: (err, model) => {
     if (!err && model) {
-      console.log(
-        `The collection: '${model.modelName}', on connection: '${model.connectionName}', was created successfully!`
-          .cyan
-      )
+      console.log(`The collection: '${model.modelName}', on connection: '${model.connectionName}', was created successfully!`.cyan)
     } else {
       console.log(err)
     }

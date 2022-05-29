@@ -25,7 +25,7 @@ export default class queryBuilder {
     return 'this.select'
   }
 
-  raw = async (dbConn_table_query) => {
+  raw = async dbConn_table_query => {
     // NOT IMPLEMENTED
     throw new Error('Not implemented')
     // try {
@@ -43,43 +43,44 @@ export default class queryBuilder {
     // }
   }
 
-  tableExists = async (dbConn_table) => {
+  tableExists = async dbConn_table => {
     try {
-      return await this.databaseConnections[
-        dbConn_table.whichConnection
-      ].connectionManager.tableExists(
-        this.databaseConnections[dbConn_table.whichConnection].connection,
-        this.databaseConnections[dbConn_table.whichConnection].models[
-          dbConn_table.modelName
-        ]
-      )
+      return await this.databaseConnections[dbConn_table.whichConnection].connectionManager.tableExists(this.databaseConnections[dbConn_table.whichConnection].connection, this.databaseConnections[dbConn_table.whichConnection].models[dbConn_table.modelName])
     } catch (err) {
       return { err }
     }
   }
 
-  createTable = async (dbConn_table) => {
+  createTable = async dbConn_table => {
     try {
       let res = await this.tableExists(dbConn_table)
       if (res.err) return res
       if (res) return { err: 'Table already exists' }
 
-      return await this.databaseConnections[
-        dbConn_table.whichConnection
-      ].connectionManager.createTable(
-        this.databaseConnections[dbConn_table.whichConnection].connection,
-        this.databaseConnections[dbConn_table.whichConnection].models[
-          dbConn_table.modelName
-        ]
-      )
+      return await this.databaseConnections[dbConn_table.whichConnection].connectionManager.createTable(this.databaseConnections[dbConn_table.whichConnection].connection, this.databaseConnections[dbConn_table.whichConnection].models[dbConn_table.modelName])
     } catch (err) {
       return { err }
     }
   }
 
-  alterTable = () => {
-    // const query = new queryBuilder()
-    // query.query.createTable = model
-    // return query
+  renameField = async (dbConn_table, oldNewName) => {
+    try {
+      return await this.databaseConnections[dbConn_table.whichConnection].connectionManager.renameField(this.databaseConnections[dbConn_table.whichConnection].connection, this.databaseConnections[dbConn_table.whichConnection].models[dbConn_table.modelName], oldNewName)
+    } catch (err) {
+      return { err }
+    }
+  }
+
+  alterTable = async dbConn_table => {
+    try {
+      let res = await this.tableExists(dbConn_table)
+      if (res.err) return res
+      if (!res) return { err: 'Table does not exist' }
+
+      let preserveData = dbConn_table.preserveData === false ? false : true
+      return await this.databaseConnections[dbConn_table.whichConnection].connectionManager.alterTable(this.databaseConnections[dbConn_table.whichConnection].connection, this.databaseConnections[dbConn_table.whichConnection].models[dbConn_table.modelName], preserveData)
+    } catch (err) {
+      return { err }
+    }
   }
 }

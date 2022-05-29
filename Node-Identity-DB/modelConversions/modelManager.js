@@ -1,13 +1,7 @@
 import helpers from '../helpers/helpers.js'
 
 export default class modelManager {
-  constructor(
-    databaseType,
-    modelName,
-    connectionName,
-    model,
-    additionalConfig
-  ) {
+  constructor(databaseType, modelName, connectionName, model, additionalConfig) {
     this.databaseType = databaseType
     this.modelName = modelName
     this.connectionName = connectionName
@@ -63,7 +57,7 @@ export default class modelManager {
   // Validate the model
   // Ensures basic model structure
   // Needs to be fleshed out
-  validateModel = (model, callBack) => {
+  validateModel = model => {
     if (model) {
       const genericTypes = Object.keys(helpers.genericTypes)
       const modelKeys = Object.keys(model)
@@ -87,7 +81,6 @@ export default class modelManager {
                 const innerKeyType = typeof model[modelKey][innerKey]
 
                 if (!genericTypes.includes(innerKeyType)) {
-                  // callBack(`Invalid type for ${innerKey}`, false)
                   throw new Error(`Invalid type for ${innerKey}`)
                 }
               }
@@ -118,9 +111,7 @@ export default class modelManager {
 
   getDefaultValue = (type, modelKey) => {
     try {
-      return modelKey.defaultValue
-        ? modelKey.defaultValue
-        : helpers.genericTypes[type]
+      return modelKey.defaultValue ? modelKey.defaultValue : helpers.genericTypes[type]
     } catch (error) {
       throw new Error(`Unknown type: ${modelKey}`)
     }

@@ -4,90 +4,137 @@ import NIDB from './Node-Identity-DB/NIDB.js'
 import DBconnections from './DBconnections.js'
 import Models from './Models.js'
 
+// import { Users, Items } from './seedData/seedData.js'
+
+// console.log(Users, Items)
+
 let dbConnections = new NIDB()
 
-const setupConnections = async () => {
-  await dbConnections.useDatabase(DBconnections['users'])
-  dbConnections.useModel(Models['users'])
-  await dbConnections.useDatabase(DBconnections['items'])
-  dbConnections.useModel(Models['items'])
+// open connections
+await dbConnections.useDatabase(DBconnections['users'])
+await dbConnections.useDatabase(DBconnections['items'])
 
-  // await dbConnections.useDatabases([
-  //   DBconnections['users'],
-  //   DBconnections['items'],
-  // ])
-  // dbConnections.useModels([Models['users'], Models['items']])
+// load models
+dbConnections.useModel(Models['users'])
+dbConnections.useModel(Models['items'])
+dbConnections.useModel(Models['users_test'])
 
-  dbConnections.onInitialized((err, dbConns, models) => {
-    if (err) {
-      console.log(err)
+// notify fully initialized
+dbConnections.onInitialized((err, dbConns, models) => {
+  if (err) {
+    console.log(err)
+  } else {
+    if (dbConns?.length) {
+      console.log(`These database connections have been established:`.red, dbConns)
+      console.log(`These models have been established:`.cyan, models)
     } else {
-      if (dbConns?.length) {
-        console.log(
-          `These database connections have been established: `.red,
-          dbConns
-        )
-        console.log(`These models have been established: `.cyan, models)
-      } else {
-        console.log(`No database connections have been established.`.red)
-        console.log(`No models have been established.`.cyan)
-      }
+      console.log(`No database connections have been established.`.red)
+      console.log(`No models have been established.`.cyan)
     }
-  })
-
-  // console.log(dbConnections)
-  // console.log(dbConnections.queryBuilder().select())
-
-  let res
-
-  // res = await dbConnections.queryBuilder().tableExists({
-  //   whichConnection: 'users',
-  //   modelName: 'users',
-  // })
-  // console.log('users', res)
-
-  // if (!res) {
-  //   res = await dbConnections.queryBuilder().createTable({
-  //     whichConnection: 'users',
-  //     modelName: 'users',
-  //   })
-  //   console.log('creation users', res)
-  // }
-
-  res = await dbConnections.queryBuilder().tableExists({
-    whichConnection: 'items',
-    modelName: 'items',
-  })
-  console.log('items', res)
-
-  if (!res) {
-    res = await dbConnections.queryBuilder().createTable({
-      whichConnection: 'items',
-      modelName: 'items',
-    })
-    console.log('items', res)
   }
-}
+})
 
-await setupConnections()
+// testing
 
-// setTimeout(() => {
-//   console.log(dbConnections)
-// }, 1000)
+// console.log(dbConnections)
+// console.log(dbConnections.queryBuilder().select())
 
-setTimeout(async () => {
-  if (dbConnections.hasActiveConnections()) {
-    await dbConnections.closeConnections(null, (err, dbList) => {
-      if (!err && dbList) {
-        console.log(`Database connections closed:`.blue, dbList)
-      } else {
-        console.log(err)
-      }
-    })
+let res
+
+// does not work yet
+res = await dbConnections.queryBuilder().alterTable({
+  whichConnection: 'items',
+  modelName: 'items',
+  preserveData: false,
+})
+console.log('items', res)
+
+// close connections
+await dbConnections.closeConnections(null, (err, dbList) => {
+  if (!err && dbList) {
+    console.log(`Database connections closed:`.blue, dbList)
+  } else {
+    console.log(err)
   }
-}, 3000)
+})
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// await dbConnections.useDatabases([
+//   DBconnections['users'],
+//   DBconnections['items'],
+// ])
+// dbConnections.useModels([Models['users'], Models['items']])
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// res = await dbConnections.queryBuilder().tableExists({
+//   whichConnection: 'users',
+//   modelName: 'users',
+// })
+// console.log('users', res)
+
+// if (!res) {
+//   res = await dbConnections.queryBuilder().createTable({
+//     whichConnection: 'users',
+//     modelName: 'users',
+//   })
+//   console.log('creation users', res)
+// }
+
+// res = await dbConnections.queryBuilder().tableExists({
+//   whichConnection: 'items',
+//   modelName: 'items',
+// })
+// console.log('items', res)
+
+// if (!res) {
+//   res = await dbConnections.queryBuilder().createTable({
+//     whichConnection: 'items',
+//     modelName: 'items',
+//   })
+//   console.log('items', res)
+// }
+
+// res = await dbConnections.queryBuilder().tableExists({
+//   whichConnection: 'items',
+//   modelName: 'users_test',
+// })
+// console.log('users_test', res)
+
+// if (!res) {
+//   res = await dbConnections.queryBuilder().createTable({
+//     whichConnection: 'items',
+//     modelName: 'users_test',
+//   })
+//   console.log('users_test', res)
+// }
+
+// res = await dbConnections.queryBuilder().renameField(
+//   {
+//     whichConnection: 'items',
+//     modelName: 'items',
+//   },
+//   {
+//     oldFieldName: 'item_name',
+//     newFieldName: 'name',
+//   }
+// )
+// console.log('items', res)
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// setTimeout(async () => {
+//   if (dbConnections.hasActiveConnections()) {
+//     await dbConnections.closeConnections(null, (err, dbList) => {
+//       if (!err && dbList) {
+//         console.log(`Database connections closed:`.blue, dbList)
+//       } else {
+//         console.log(err)
+//       }
+//     })
+//   }
+// }, 3000)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
