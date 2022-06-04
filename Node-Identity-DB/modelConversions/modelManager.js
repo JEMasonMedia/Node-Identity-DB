@@ -19,41 +19,6 @@ export default class modelManager {
     }
   }
 
-  // C R U D
-  // create = (data, callBack) => {}
-  // read = (data, callBack) => {}
-  // update = (data, callBack) => {}
-  // delete = (data, callBack) => {}
-
-  // M A N A G E R
-  // Ensures the model and the table in the database are in sync
-  // Allows for runtime modifications of the table, especially significant for SQL databases
-  //   - For a database manger interface for easy multi database manipulation
-  //   - For runtime use such as adding and subtracting columns for both SQL and NoSQL databases
-  // This can be a very dangerous function and should be used very carefully during runtime and potentially only be used for testing and development
-
-  // createModifyTable = async (dbConn, modelName, callBack) => {
-  // console.log(this)
-  // if (dbConn && modelName && callBack) {
-  //   try {
-  //     const result = await connectionManager.createModifyTable(
-  //       dbConn.databaseType,
-  //       dbConn,
-  //       modelName
-  //     )
-  //     if (result.err) {
-  //       callBack(result)
-  //     } else {
-  //       callBack(null, dbConn.models[modelName])
-  //     }
-  //   } catch (err) {
-  //     callBack(err)
-  //   }
-  // } else {
-  //   callBack({ err: 'Invalid arguments' })
-  // }
-  // }
-
   // Validate the model
   // Ensures basic model structure
   // Needs to be fleshed out

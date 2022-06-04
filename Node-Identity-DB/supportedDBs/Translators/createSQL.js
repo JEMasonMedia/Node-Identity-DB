@@ -25,9 +25,17 @@ export default class createSQL {
   }
 
   createTable = model => {
-    let define = {}
+    // return {
+    //   [`${tableName}`]: tableSchema
+    //     .map(({ Field, ...rest }) => {
+    //       return { [`${Field}`]: rest }
+    //     })
+    //     .reduce((obj, v) => {
+    //       return { ...obj, ...v }
+    //     }, {}),
+    // }
 
-    Object.keys(model.model)
+    let define = Object.keys(model.model)
       .map(field => {
         return {
           [field]: {
@@ -35,12 +43,9 @@ export default class createSQL {
           },
         }
       })
-      .forEach(field => {
-        define = {
-          ...define,
-          ...field,
-        }
-      })
+      .reduce((obj, v) => {
+        return { ...obj, ...v }
+      }, {})
 
     return this.sqlBuilder.$createTable({
       $table: model.modelName,
@@ -50,9 +55,9 @@ export default class createSQL {
 
   // will need to account for sql server
   // possible downgrade to translator as it is a narrow function
-  renameField = (model, oldNewName) => {
-    return `ALTER TABLE ${model.modelName} RENAME COLUMN ${oldNewName.oldFieldName} TO ${oldNewName.newFieldName}`
-  }
+  // renameField = (model, oldNewName) => {
+  //   return `ALTER TABLE ${model.modelName} RENAME COLUMN ${oldNewName.oldFieldName} TO ${oldNewName.newFieldName}`
+  // }
 
   alterTable = (model, preserveData) => {
     let define = {}
