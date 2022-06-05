@@ -1,10 +1,11 @@
 import { MongoClient } from 'mongodb'
 import MongoDBTranslator from '../Translators/MongoDBTranslator.js'
 
-export default class MongoDBManager extends MongoDBTranslator {
-  static dbType = 'MONGODB'
+export default class MongoDBManager {
+  dbType = 'MONGODB'
+  translator = new MongoDBTranslator()
 
-  static connectDB = async (connectionConfig, additionalConfig) => {
+  connectDB = async (connectionConfig, additionalConfig) => {
     try {
       // this needs to be fleshed out
       // for atlas
@@ -28,7 +29,7 @@ export default class MongoDBManager extends MongoDBTranslator {
     }
   }
 
-  static disconnectDB = async dbConn => {
+  disconnectDB = async dbConn => {
     try {
       await dbConn.close()
       return true
@@ -37,7 +38,7 @@ export default class MongoDBManager extends MongoDBTranslator {
     }
   }
 
-  static raw = async (dbConn, query) => {
+  raw = async (dbConn, query) => {
     // NOT IMPLEMENTED
     // try {
     //   return await this.databaseConnections[
@@ -54,7 +55,7 @@ export default class MongoDBManager extends MongoDBTranslator {
     // }
   }
 
-  static tableExists = async (dbConn, model) => {
+  tableExists = async (dbConn, model) => {
     try {
       const exists = await dbConn.db().listCollections({ name: model.modelName }).toArray()
       return exists.length > 0
@@ -63,7 +64,7 @@ export default class MongoDBManager extends MongoDBTranslator {
     }
   }
 
-  static createTable = async (dbConn, model) => {
+  createTable = async (dbConn, model) => {
     try {
       await dbConn.db().createCollection(model.modelName)
       return true
@@ -73,7 +74,7 @@ export default class MongoDBManager extends MongoDBTranslator {
     }
   }
 
-  static renameField = async (dbConn, model, oldFieldName, newFieldName) => {
+  renameField = async (dbConn, model, oldFieldName, newFieldName) => {
     try {
       await dbConn
         .db()
@@ -85,7 +86,7 @@ export default class MongoDBManager extends MongoDBTranslator {
     }
   }
 
-  static alterTable = async (dbConn, model, preserveData) => {
+  alterTable = async (dbConn, model, preserveData) => {
     try {
       const collection = await dbConn.db().collection(model.modelName)
       const numDocs = await collection.countDocuments()

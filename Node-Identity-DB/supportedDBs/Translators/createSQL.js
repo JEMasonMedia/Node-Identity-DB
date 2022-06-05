@@ -1,22 +1,6 @@
 import SQLBuilder from 'json-sql-builder2'
 
-// Setup a new instance for MySQL
-// var sql = new SQLBuilder('MySQL');
-
-// Setup a new instance for MariaDB
-// var sql = new SQLBuilder('MariaDB');
-
-// Setup a new instance for PostgreSQL
-// var sql = new SQLBuilder('PostgreSQL');
-
-// Setup a new instance for SQLite
-// var sql = new SQLBuilder('SQLite');
-
-// Setup a new instance for Oracle
-// var sql = new SQLBuilder('Oracle');
-
-// Setup a new instance for SQLServer
-// var sql = new SQLBuilder('SQLServer');
+// [ 'PostgreSQL', 'MySQL', 'MariaDB', 'Oracle', 'SQLServer', 'SQLite' ]
 
 export default class createSQL {
   constructor(dbType) {
@@ -25,63 +9,66 @@ export default class createSQL {
   }
 
   createTable = model => {
-    // return {
-    //   [`${tableName}`]: tableSchema
-    //     .map(({ Field, ...rest }) => {
-    //       return { [`${Field}`]: rest }
-    //     })
-    //     .reduce((obj, v) => {
-    //       return { ...obj, ...v }
-    //     }, {}),
-    // }
-
-    let define = Object.keys(model.model)
-      .map(field => {
-        return {
-          [field]: {
-            $column: this.#defineField(model.model[field]),
-          },
-        }
-      })
-      .reduce((obj, v) => {
-        return { ...obj, ...v }
-      }, {})
-
-    return this.sqlBuilder.$createTable({
+    let sql = this.sqlBuilder.$createTable({
       $table: model.modelName,
-      $define: define,
+      $define: Object.keys(model.model)
+        .map(field => {
+          return {
+            [field]: {
+              $column: this.#defineField(model.model[field]),
+            },
+          }
+        })
+        .reduce((obj, v) => {
+          return { ...obj, ...v }
+        }, {}),
     })
+
+    sql.values.forEach(v => {
+      sql.sql = sql.sql.replace('?', `'${v}'`)
+    })
+    return sql
   }
 
-  // will need to account for sql server
-  // possible downgrade to translator as it is a narrow function
-  // renameField = (model, oldNewName) => {
-  //   return `ALTER TABLE ${model.modelName} RENAME COLUMN ${oldNewName.oldFieldName} TO ${oldNewName.newFieldName}`
-  // }
+  addColumns = (model, add) => {
+    let m = JSON.parse(JSON.stringify(model))
+    Object.keys(m.model).map(field => {
+      if (!(add.indexOf(field) > -1)) {
+        delete m.model[field]
+      }
+    })
+    return this.createTable(m).sql.replace('CREATE', 'ALTER').replace('(', 'ADD COLUMN (')
+  }
+
+  dropColumns = (model, drop) => {
+    return `ALTER TABLE ${model.modelName} DROP COLUMN ${drop.join(', ')}`.replaceAll(', ', ', DROP COLUMN ')
+  }
+
+  modifyColumns = (model, modify) => {
+    return true
+  }
 
   alterTable = (model, preserveData) => {
-    let define = {}
-
-    Object.keys(model.model)
-      .map(field => {
-        return {
-          [field]: {
-            $column: this.#defineField(model.model[field]),
-          },
-        }
-      })
-      .forEach(field => {
-        define = {
-          ...define,
-          ...field,
-        }
-      })
-
-    return this.sqlBuilder.$alterTable({
-      $table: model.modelName,
-      $define: define,
-      $preserveData: preserveData,
-    })
+    // let define = {}
+    // Object.keys(model.model)
+    //   .map(field => {
+    //     return {
+    //       [field]: {
+    //         $column: this.#defineField(model.model[field]),
+    //       },
+    //     }
+    //   })
+    //   .forEach(field => {
+    //     define = {
+    //       ...define,
+    //       ...field,
+    //     }
+    //   })
+    // return this.sqlBuilder.$alterTable({
+    //   $table: model.modelName,
+    //   $define: define,
+    //   $preserveData: preserveData,
+    // })
   }
 
   #defineField = field => {
@@ -91,7 +78,8 @@ export default class createSQL {
       $notNull: field.nullable ? false : true,
       $autoInc: field.autoIncrement ? true : null,
       $primary: field.key === 'primary' ? true : null,
-      $foreignKey: field.key === 'secondary' ? true : null,
+      $foreignKey: field.key === 'foreign' ? true : null,
+      $default: field.defaultValue ? field.defaultValue : null,
     }
 
     Object.keys(column).map(c => {
@@ -103,12 +91,18 @@ export default class createSQL {
     return column
   }
 
+  convertType = type => {
+    return this.#defineType(type).toString().toLocaleLowerCase()
+  }
+
   #defineType = type => {
     switch (type) {
       case 'string':
         return 'VARCHAR'
       case 'int':
         return 'INT'
+      case 'long':
+        return 'BIGINT'
       case 'number':
         return 'DECIMAL'
       case 'double':
@@ -127,7 +121,7 @@ export default class createSQL {
       case 'object':
         return this.#objectType()
       default:
-        return 'VARCHAR'
+        return 'TEXT'
     }
   }
 
@@ -150,9 +144,18 @@ export default class createSQL {
 
   #genericTypes = {
     string: '',
-    number: 0,
+    number: 0.0,
+    int: 0,
+    long: 0,
     double: 0.0,
     boolean: false,
+    unique: false,
+    nullable: true,
+    autoIncrement: false,
+    primary: false,
+    foreign: false,
+    size: null,
+    default: null,
     array: [],
     object: {},
     date: null,

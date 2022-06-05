@@ -31,7 +31,7 @@ const models = {
   items: {
     _id: {
       key: 'primary',
-      type: 'int',
+      type: 'long',
       unique: true,
       nullable: false,
       autoIncrement: true,
@@ -41,11 +41,23 @@ const models = {
       size: 255,
       nullable: false,
     },
+    brand: {
+      type: 'string',
+      size: 255,
+      nullable: false,
+      defaultValue: 'Company Example Inc.',
+    },
     description: {
       type: 'string',
       size: 255,
       nullable: true,
     },
+    // test_column: {
+    //   type: 'string',
+    //   size: 255,
+    //   nullable: true,
+    //   defaultValue: 'Test Value',
+    // },
     price: {
       type: 'double',
       nullable: false,
@@ -70,12 +82,12 @@ export default {
     model: models['items'],
     additionalConfig: {},
   },
-  users_test: {
-    connectionName: 'items',
-    modelName: 'users_test',
-    model: models['users'],
-    additionalConfig: {},
-  },
+  // users_test: {
+  //   connectionName: 'items',
+  //   modelName: 'users_test',
+  //   model: models['users'],
+  //   additionalConfig: {},
+  // },
   callBack: (err, model) => {
     if (!err && model) {
       console.log(`The collection: '${model.modelName}', on connection: '${model.connectionName}', was created successfully!`.cyan)

@@ -1,4 +1,4 @@
-export const supportedDBFiles = {
+const supportedDBFiles = {
   MONGODB: {
     managerFile: './Managers/MongoDBManager.js',
   },
@@ -7,7 +7,7 @@ export const supportedDBFiles = {
   },
 }
 
-const importManager = async (dbType) => {
+const importManager = async dbType => {
   const managerFile = await import(supportedDBFiles[dbType].managerFile)
   return managerFile.default
 }
@@ -15,13 +15,13 @@ const importManager = async (dbType) => {
 export default class {
   static allowedDBs = Object.keys(supportedDBFiles)
 
-  static validateDBType = (dbType) => {
+  static validateDBType = dbType => {
     return this.allowedDBs.includes(dbType)
   }
 
-  static getDBManager = async (dbType) => {
+  static getDBManager = async dbType => {
     if (this.validateDBType(dbType)) {
-      return await importManager(dbType)
+      return new (await importManager(dbType))()
     } else {
       return new Error('Unsupported DB type')
     }

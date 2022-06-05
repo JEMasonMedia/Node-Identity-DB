@@ -17,7 +17,7 @@ await dbConnections.useDatabase(DBconnections['items'])
 // load models
 dbConnections.useModel(Models['users'])
 dbConnections.useModel(Models['items'])
-dbConnections.useModel(Models['users_test'])
+// dbConnections.useModel(Models['users_test'])
 
 // notify fully initialized
 dbConnections.onInitialized((err, dbConns, models) => {
