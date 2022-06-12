@@ -44,9 +44,37 @@ export default class createSQL {
     return `ALTER TABLE ${model.modelName} DROP COLUMN ${drop.join(', ')}`.replaceAll(', ', ', DROP COLUMN ')
   }
 
-  modifyColumns = (model, modify) => {
-    return true
+  modifyColumn = (model, modify, type) => {
+    let m = JSON.parse(JSON.stringify(model))
+    Object.keys(m.model).map(field => {
+      if (modify !== field) {
+        delete m.model[field]
+      }
+    })
+    let sql = this.createTable(m).sql.replace('CREATE', 'ALTER').replace('(', 'MODIFY ')
+
+    if (type === 'no_auto_increment_key') {
+      sql = sql.replace('AUTO_INCREMENT', '').replace('PRIMARY KEY', '').trim()
+    }
+
+    return sql.slice(0, sql.lastIndexOf(')'))
   }
+
+  // dropPrimaryKey = (model, modify) => {
+  //   // return this.createSQL.dropPrimaryKey(model, modify)
+  // }
+
+  // addPrimaryKey = (model, modify) => {
+  //   // return this.createSQL.addPrimaryKey(model, modify)
+  // }
+
+  // dropForeignKey = (model, modify) => {
+  //   // return this.createSQL.dropForeignKey(model, modify)
+  // }
+
+  // addForeignKey = (model, modify) => {
+  //   // return this.createSQL.addForeignKey(model, modify)
+  // }
 
   alterTable = (model, preserveData) => {
     // let define = {}
@@ -72,9 +100,13 @@ export default class createSQL {
   }
 
   #defineField = field => {
+    let [type, size] = this.#stringSize(field.type, field?.size)
+
     let column = {
-      $type: this.#defineType(field.type),
-      $size: field.size ? field.size : null,
+      // $type: this.#defineType(field.type),
+      // $size: field.size ? field.size : null,
+      $type: this.#defineType(type),
+      $size: size ? size : null,
       $notNull: field.nullable ? false : true,
       $autoInc: field.autoIncrement ? true : null,
       $primary: field.key === 'primary' ? true : null,
@@ -91,14 +123,37 @@ export default class createSQL {
     return column
   }
 
-  convertType = type => {
-    return this.#defineType(type).toString().toLocaleLowerCase()
+  convertType = (type, size) => {
+    if (type !== 'string') return this.#defineType(type).toString().toLowerCase()
+
+    let [t, s] = this.#stringSize(type, size)
+    return this.#defineType(t).toString().toLowerCase()
+  }
+
+  #stringSize = (type, size) => {
+    if (type !== 'string') return [type, size]
+
+    if (size > 0 && size < 256) {
+      return ['VARCHAR', size]
+    }
+
+    return [this.#stringType(), null]
   }
 
   #defineType = type => {
     switch (type) {
-      case 'string':
+      // case 'string':
+      //   return 'VARCHAR'
+      case 'VARCHAR':
         return 'VARCHAR'
+      case 'LONGTEXT':
+        return 'LONGTEXT'
+      case 'TEXT':
+        return 'TEXT'
+      case 'BLOB':
+        return 'BLOB'
+      case 'NVARCHAR(MAX)':
+        return 'NVARCHAR(MAX)'
       case 'int':
         return 'INT'
       case 'long':
@@ -120,6 +175,25 @@ export default class createSQL {
       case 'array':
       case 'object':
         return this.#objectType()
+      default:
+        return this.#stringType()
+    }
+  }
+
+  possibleStringTypes = ['VARCHAR', 'NVARCHAR(MAX)', 'TEXT', 'LONGTEXT', 'BLOB']
+
+  #stringType = () => {
+    switch (this.dbType) {
+      case 'MySQL':
+      case 'MariaDB':
+      case 'PostgreSQL':
+        return 'LONGTEXT'
+      case 'SQLite':
+        return 'TEXT'
+      case 'Oracle':
+        return 'BLOB'
+      case 'SQLServer':
+        return 'NVARCHAR(MAX)'
       default:
         return 'TEXT'
     }

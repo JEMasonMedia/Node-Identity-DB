@@ -26,21 +26,11 @@ export default class queryBuilder {
   }
 
   raw = async dbConn_table_query => {
-    // NOT IMPLEMENTED
-    throw new Error('Not implemented')
-    // try {
-    //   return await this.databaseConnections[
-    //     dbConn_table_query.whichConnection
-    //   ].connectionManager.raw(
-    //     this.databaseConnections[dbConn_table_query.whichConnection].connection,
-    //     this.databaseConnections[dbConn_table_query.whichConnection].models[
-    //       dbConn_table_query.modelName
-    //     ],
-    //     dbConn_table_query.query
-    //   )
-    // } catch (err) {
-    //   return { err }
-    // }
+    try {
+      return await this.databaseConnections[dbConn_table_query.whichConnection].connectionManager.raw(this.databaseConnections[dbConn_table_query.whichConnection].connection, dbConn_table_query.query)
+    } catch (err) {
+      return { err }
+    }
   }
 
   tableExists = async dbConn_table => {

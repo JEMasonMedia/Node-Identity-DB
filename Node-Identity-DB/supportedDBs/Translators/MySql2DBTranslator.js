@@ -17,7 +17,11 @@ export default class MySql2DBTranslator {
   }
 
   getTableSchemaQuery = modelName => {
-    return `SHOW COLUMNS FROM ${modelName}`
+    return `DESCRIBE ${modelName}`
+  }
+
+  getFieldSchemaQuery = (modelName, fieldName) => {
+    return `DESCRIBE ${modelName} ${fieldName}`
   }
 
   getAlterTableQuery = (model, preserveData) => {
@@ -32,8 +36,28 @@ export default class MySql2DBTranslator {
     return this.createSQL.dropColumns(model, drop)
   }
 
-  getModifyColumnsQuery = (model, modify) => {
-    return this.createSQL.modifyColumns(model, modify)
+  getModifyColumnQuery = (model, modify, type) => {
+    return this.createSQL.modifyColumn(model, modify, type)
+  }
+
+  getDropPrimaryKeyQuery = (model, modify) => {
+    // return this.createSQL.dropPrimaryKey(model, modify)
+    return `ALTER TABLE ${model.modelName} DROP PRIMARY KEY`
+  }
+
+  getAddPrimaryKeyQuery = (model, modify) => {
+    // return this.createSQL.addPrimaryKey(model, modify)
+    return `ALTER TABLE ${model.modelName} ADD PRIMARY KEY (${modify})`
+  }
+
+  getDropForeignKeyQuery = (model, modify) => {
+    // return this.createSQL.dropForeignKey(model, modify)
+    // return `ALTER TABLE ${model.modelName} DROP FOREIGN KEY ${modify.foreignKeyName}`
+  }
+
+  getAddForeignKeyQuery = (model, modify) => {
+    // return this.createSQL.addForeignKey(model, modify)
+    // return `ALTER TABLE ${model.modelName} ADD CONSTRAINT ${modify.foreignKeyName} FOREIGN KEY (${modify.foreignKeyFields}) REFERENCES ${modify.foreignKeyRefTable} (${modify.foreignKeyRefFields}) ON DELETE ${modify.foreignKeyOnDelete} ON UPDATE ${modify.foreignKeyOnUpdate}`
   }
 
   getDropTableQuery = modelName => {
@@ -89,12 +113,16 @@ export default class MySql2DBTranslator {
     for (let i = 0; i < schemaKeys.length; i++) {
       switch (schemaKeys[i]) {
         case 'Type':
-          convertType = this.createSQL.convertType(field.type)
-          if (convertType === 'varchar') {
-            let type = testField.Type.split('(')[0]
-            let size = testField.Type.split('(')[1].split(')')[0]
-            if (type && size) {
-              if (typeof field.size === 'undefined' || type !== convertType || size !== String(field.size)) return false
+          convertType = this.createSQL.convertType(field.type, field?.size)
+          if (this.createSQL.possibleStringTypes.includes(convertType.toUpperCase())) {
+            if (convertType === 'varchar' && testField.Type.includes('varchar')) {
+              let type = testField.Type.split('(')[0]
+              let size = testField.Type.split('(')[1].split(')')[0]
+              if (type && size) {
+                if (typeof field.size === 'undefined' || type !== convertType || size !== String(field.size)) return false
+              }
+            } else {
+              if (testField.Type !== convertType) return false
             }
           } else if (typeof field.type !== 'undefined' && testField.Type !== convertType) return false
           break

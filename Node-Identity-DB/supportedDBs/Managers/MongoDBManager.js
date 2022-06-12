@@ -40,19 +40,7 @@ export default class MongoDBManager {
 
   raw = async (dbConn, query) => {
     // NOT IMPLEMENTED
-    // try {
-    //   return await this.databaseConnections[
-    //     dbConn_table_query.whichConnection
-    //   ].connectionManager.raw(
-    //     this.databaseConnections[dbConn_table_query.whichConnection].connection,
-    //     this.databaseConnections[dbConn_table_query.whichConnection].models[
-    //       dbConn_table_query.modelName
-    //     ],
-    //     dbConn_table_query.query
-    //   )
-    // } catch (err) {
-    //   return { err }
-    // }
+    throw new Error('Not implemented')
   }
 
   tableExists = async (dbConn, model) => {

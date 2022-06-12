@@ -41,6 +41,13 @@ dbConnections.onInitialized((err, dbConns, models) => {
 
 let res
 
+// res = await dbConnections.queryBuilder().raw({
+//   whichConnection: 'items',
+//   modelName: 'items',
+//   query: 'DESCRIBE items',
+// })
+// console.log('items', res)
+
 // does not work yet
 res = await dbConnections.queryBuilder().alterTable({
   whichConnection: 'items',

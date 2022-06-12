@@ -35,20 +35,11 @@ export default class MySql2DBManager extends MySql2DBTranslator {
   }
 
   raw = async (dbConn, query) => {
-    // NOT IMPLEMENTED
-    // try {
-    //   return await this.databaseConnections[
-    //     dbConn_table_query.whichConnection
-    //   ].connectionManager.raw(
-    //     this.databaseConnections[dbConn_table_query.whichConnection].connection,
-    //     this.databaseConnections[dbConn_table_query.whichConnection].models[
-    //       dbConn_table_query.modelName
-    //     ],
-    //     dbConn_table_query.query
-    //   )
-    // } catch (err) {
-    //   return { err }
-    // }
+    try {
+      return (await dbConn.connection.promise().query(query))[0]
+    } catch (err) {
+      return { err }
+    }
   }
 
   tableExists = async (dbConn, model) => {
@@ -87,14 +78,11 @@ export default class MySql2DBManager extends MySql2DBTranslator {
     }
   }
 
+  // needs work
   alterTable = async (dbConn, model, preserveData) => {
     try {
-      // const query = this.translator.getAlterTableQuery(model, preserveData)
-      // await dbConn.connection.promise().query(query.sql)
-
       const res = (await dbConn.connection.promise().query(this.translator.getTableSchemaQuery(model.modelName)))[0]
       const schema = this.convertSchema(model.modelName, res)
-      // console.log(schema[model.modelName])
       const { add, drop, modify } = this.translator.compareSchema(schema, model)
       console.log('add', add)
       console.log('drop', drop)
@@ -119,9 +107,27 @@ export default class MySql2DBManager extends MySql2DBTranslator {
       }
 
       if (modify.length > 0) {
-        let modQ = this.translator.getModifyColumnsQuery(model, modify)
-        console.log(modQ)
-        // await dbConn.connection.promise().query()
+        for (let i = 0; i < modify.length; i++) {
+          let key = model.model[modify[i]]?.key
+          if (key !== null && ['primary', 'foreign'].includes(model.model[modify[i]]?.key)) {
+            let which = {
+              primary: {
+                drop: 'getDropPrimaryKeyQuery',
+                add: 'getAddPrimaryKeyQuery',
+              },
+              foreign: {
+                drop: 'getDropForeignKeyQuery',
+                add: 'getAddForeignKeyQuery',
+              },
+            }
+
+            await dbConn.connection.promise().query(this.translator.getModifyColumnQuery(model, modify[i], 'no_auto_increment_key'))
+            await dbConn.connection.promise().query(this.translator[which[key].drop](model, modify[i]))
+            await dbConn.connection.promise().query(this.translator.getModifyColumnQuery(model, modify[i]))
+          } else {
+            await dbConn.connection.promise().query(this.translator.getModifyColumnQuery(model, [modify[i]]))
+          }
+        }
       }
 
       return true
