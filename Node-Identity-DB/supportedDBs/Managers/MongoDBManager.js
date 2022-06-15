@@ -4,6 +4,7 @@ import MongoDBTranslator from '../Translators/MongoDBTranslator.js'
 export default class MongoDBManager {
   dbType = 'MONGODB'
   translator = new MongoDBTranslator()
+  connection = null
 
   connectDB = async (connectionConfig, additionalConfig) => {
     try {
@@ -20,41 +21,47 @@ export default class MongoDBManager {
       if (dbPass === null) mongoURI = `mongodb://${connectionConfig.host}:${connectionConfig.port}/${connectionConfig.database}`
       else mongoURI = `mongodb+srv://${userPass}${connectionConfig.host}/${connectionConfig.database}?retryWrites=true&w=majority`
 
-      const client = new MongoClient(mongoURI)
-      await client.connect()
+      this.connection = new MongoClient(mongoURI)
+      await this.connection.connect()
 
-      return client
-    } catch (err) {
-      return { err }
-    }
-  }
-
-  disconnectDB = async dbConn => {
-    try {
-      await dbConn.close()
       return true
     } catch (err) {
       return { err }
     }
   }
 
-  raw = async (dbConn, query) => {
-    // NOT IMPLEMENTED
-    throw new Error('Not implemented')
+  disconnectDB = async () => {
+    try {
+      await this.connection.close()
+      return true
+    } catch (err) {
+      return { err }
+    }
   }
 
-  tableExists = async (dbConn, model) => {
+  raw = async modelArgs => {
+    let res = await this.connection
+      .db()
+      .collection(modelArgs.modelName)
+      // .find(...modelArgs.query)
+      .find(modelArgs.query[0])
+      .project(modelArgs.query[1])
+    // console.log(this.connection.db().collection(modelArgs.modelName).find())
+    return res.toArray()
+  }
+
+  tableExists = async model => {
     try {
-      const exists = await dbConn.db().listCollections({ name: model.modelName }).toArray()
+      const exists = await this.connection.db().listCollections({ name: model.modelName }).toArray()
       return exists.length > 0
     } catch (err) {
       return { err }
     }
   }
 
-  createTable = async (dbConn, model) => {
+  createTable = async model => {
     try {
-      await dbConn.db().createCollection(model.modelName)
+      await this.connection.db().createCollection(model.modelName)
       return true
     } catch (err) {
       if (err.toString().includes('Collection already exists')) return { err: 'Table already exists' }
@@ -62,9 +69,9 @@ export default class MongoDBManager {
     }
   }
 
-  renameField = async (dbConn, model, oldFieldName, newFieldName) => {
+  renameField = async (model, oldFieldName, newFieldName) => {
     try {
-      await dbConn
+      await this.connection
         .db()
         .collection(model.modelName)
         .updateMany({}, { $rename: { [oldFieldName]: newFieldName } })
@@ -74,9 +81,9 @@ export default class MongoDBManager {
     }
   }
 
-  alterTable = async (dbConn, model, preserveData) => {
+  alterTable = async (model, preserveData) => {
     try {
-      const collection = await dbConn.db().collection(model.modelName)
+      const collection = await this.connection.db().collection(model.modelName)
       const numDocs = await collection.countDocuments()
 
       if (numDocs < 1) return { err: 'No records, cannot modify' }

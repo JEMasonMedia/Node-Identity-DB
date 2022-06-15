@@ -41,19 +41,31 @@ dbConnections.onInitialized((err, dbConns, models) => {
 
 let res
 
-// res = await dbConnections.queryBuilder().raw({
-//   whichConnection: 'items',
-//   modelName: 'items',
-//   query: 'DESCRIBE items',
-// })
-// console.log('items', res)
-
-// usable state needs work
-res = await dbConnections.queryBuilder().alterTable({
-  model: 'items.items',
-  preserveData: false,
+res = await dbConnections.queryBuilder().raw({
+  model: 'users.users',
+  query: [{ city: 'London' }, { first_name: 1, _id: 0 }],
 })
-console.log('items', res)
+console.log('users\n', res)
+
+// res = await dbConnections
+//   .queryBuilder()
+//   .select()
+//   .from('users.users')
+//   .where()
+//   .execute()
+// console.log('users')
+// console.log(res)
+
+// res = await dbConnections
+//   .queryBuilder()
+//   .select(['name'])
+//   .from('items.items')
+//   .where({
+//     name: 'bread',
+//   })
+//   .execute()
+// console.log('items')
+// console.log(res)
 
 // close connections
 await dbConnections.closeConnections(null, (err, dbList) => {
@@ -132,6 +144,14 @@ await dbConnections.closeConnections(null, (err, dbList) => {
 // res = await dbConnections.queryBuilder().alterTable({
 //   whichConnection: 'items',
 //   modelName: 'items',
+//   preserveData: false,
+// })
+// console.log('items', res)
+
+// instantiated dot notation for model direction
+// usable state needs work
+// res = await dbConnections.queryBuilder().alterTable({
+//   model: 'items.items',
 //   preserveData: false,
 // })
 // console.log('items', res)

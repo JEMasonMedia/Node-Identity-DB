@@ -60,43 +60,52 @@ export default class createSQL {
     return sql.slice(0, sql.lastIndexOf(')'))
   }
 
-  // dropPrimaryKey = (model, modify) => {
-  //   // return this.createSQL.dropPrimaryKey(model, modify)
-  // }
+  prepareStatement = queryObject => {
+    let sql
+    switch (queryObject.queryType) {
+      case 'select':
+        sql = this.sqlBuilder[`$${queryObject.queryType}`]({
+          ...this.#select(queryObject.select),
+          $from: queryObject.model.modelName,
+          $where: { ...queryObject.where },
+        })
+        sql.values.forEach(v => {
+          sql.sql = sql.sql.replace('?', `'${v}'`)
+        })
+        return sql
+      // return this.createTable(queryObject.model)
+      case 'update':
+      // return this.addColumns(queryObject.model, queryObject.add)
+      case 'insert':
+      // return this.dropColumns(queryObject.model, queryObject.drop)
+      case 'delete':
+      // return this.modifyColumn(queryObject.model, queryObject.modify, queryObject.type)
+      default:
+        return new Error('Unknown query type')
+    }
+  }
 
-  // addPrimaryKey = (model, modify) => {
-  //   // return this.createSQL.addPrimaryKey(model, modify)
-  // }
+  convertType = (type, size) => {
+    if (type !== 'string') return this.#defineType(type).toString().toLowerCase()
 
-  // dropForeignKey = (model, modify) => {
-  //   // return this.createSQL.dropForeignKey(model, modify)
-  // }
+    let [t, s] = this.#stringSize(type, size)
+    return this.#defineType(t).toString().toLowerCase()
+  }
 
-  // addForeignKey = (model, modify) => {
-  //   // return this.createSQL.addForeignKey(model, modify)
-  // }
-
-  alterTable = (model, preserveData) => {
-    // let define = {}
-    // Object.keys(model.model)
-    //   .map(field => {
-    //     return {
-    //       [field]: {
-    //         $column: this.#defineField(model.model[field]),
-    //       },
-    //     }
-    //   })
-    //   .forEach(field => {
-    //     define = {
-    //       ...define,
-    //       ...field,
-    //     }
-    //   })
-    // return this.sqlBuilder.$alterTable({
-    //   $table: model.modelName,
-    //   $define: define,
-    //   $preserveData: preserveData,
-    // })
+  #select = what => {
+    return what !== null
+      ? {
+          ...what
+            .map(field => {
+              return {
+                [field]: 1,
+              }
+            })
+            .reduce((obj, v) => {
+              return { ...obj, ...v }
+            }, {}),
+        }
+      : null
   }
 
   #defineField = field => {
@@ -121,13 +130,6 @@ export default class createSQL {
     })
 
     return column
-  }
-
-  convertType = (type, size) => {
-    if (type !== 'string') return this.#defineType(type).toString().toLowerCase()
-
-    let [t, s] = this.#stringSize(type, size)
-    return this.#defineType(t).toString().toLowerCase()
   }
 
   #stringSize = (type, size) => {

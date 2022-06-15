@@ -12,7 +12,6 @@ export default class MySql2DBTranslator {
   }
 
   getRenameFieldQuery = (model, oldNewName) => {
-    // return this.createSQL.renameField(model, oldNewName)
     return `ALTER TABLE ${model.modelName} RENAME COLUMN ${oldNewName.oldFieldName} TO ${oldNewName.newFieldName}`
   }
 
@@ -41,12 +40,10 @@ export default class MySql2DBTranslator {
   }
 
   getDropPrimaryKeyQuery = (model, modify) => {
-    // return this.createSQL.dropPrimaryKey(model, modify)
     return `ALTER TABLE ${model.modelName} DROP PRIMARY KEY`
   }
 
   getAddPrimaryKeyQuery = (model, modify) => {
-    // return this.createSQL.addPrimaryKey(model, modify)
     return `ALTER TABLE ${model.modelName} ADD PRIMARY KEY (${modify})`
   }
 
@@ -62,6 +59,10 @@ export default class MySql2DBTranslator {
 
   getDropTableQuery = modelName => {
     return `DROP TABLE ${modelName}`
+  }
+
+  getPreparedStatement = query => {
+    return this.createSQL.prepareStatement(query)
   }
 
   compareSchema = (schema, model) => {
@@ -93,55 +94,69 @@ export default class MySql2DBTranslator {
       }
     })
 
-    // console.log(modelKeys)
-    // console.log(schemaKeys)
-    // console.log(differences)
-
     return differences
   }
 
   compareFields = (field, testField) => {
-    // let modelKeys = Object.keys(field)
-    let schemaKeys = Object.keys(testField)
     let convertType
 
-    // console.log(field)
-    // console.log(modelKeys)
-    // console.log(testField)
-    // console.log(schemaKeys)
-
-    for (let i = 0; i < schemaKeys.length; i++) {
-      switch (schemaKeys[i]) {
-        case 'Type':
-          convertType = this.createSQL.convertType(field.type, field?.size)
-          if (this.createSQL.possibleStringTypes.includes(convertType.toUpperCase())) {
-            if (convertType === 'varchar' && testField.Type.includes('varchar')) {
-              let type = testField.Type.split('(')[0]
-              let size = testField.Type.split('(')[1].split(')')[0]
-              if (type && size) {
-                if (typeof field.size === 'undefined' || type !== convertType || size !== String(field.size)) return false
-              }
-            } else {
-              if (testField.Type !== convertType) return false
-            }
-          } else if (typeof field.type !== 'undefined' && testField.Type !== convertType) return false
-          break
-        case 'Null':
-          convertType = testField.Null === 'NO' ? false : true
-          if (typeof field.nullable !== 'undefined' && convertType !== field.nullable) return false
-          break
-        case 'Key':
-          convertType = testField.Key === 'PRI' ? 'primary' : 'foreign'
-          if (typeof field.key !== 'undefined' && convertType !== field.key) return false
-          break
-        case 'Default':
-          if (typeof field.default !== 'undefined' && field.default !== testField.Default) return false
-          break
-        case 'Extra':
-          convertType = testField.Extra === 'auto_increment' ? true : false
-          if (typeof field.autoIncrement !== 'undefined' && field.autoIncrement !== convertType) return false
+    convertType = this.createSQL.convertType(field.type, field?.size)
+    if (this.createSQL.possibleStringTypes.includes(convertType.toUpperCase())) {
+      if (convertType === 'varchar' && testField.Type.includes('varchar')) {
+        let type = testField.Type.split('(')[0]
+        let size = testField.Type.split('(')[1].split(')')[0]
+        if (type && size) {
+          if (typeof field.size === 'undefined' || type !== convertType || size !== String(field.size)) return false
+        }
+      } else {
+        if (testField.Type !== convertType) return false
       }
-    }
+    } else if (typeof field.type !== 'undefined' && testField.Type !== convertType) return false
+
+    convertType = testField.Null === 'NO' ? false : true
+    if (typeof field.nullable !== 'undefined' && convertType !== field.nullable) return false
+
+    convertType = testField.Key === 'PRI' ? 'primary' : 'foreign'
+    if (typeof field.key !== 'undefined' && convertType !== field.key) return false
+
+    if (typeof field.default !== 'undefined' && field.default !== testField.Default) return false
+
+    convertType = testField.Extra === 'auto_increment' ? true : false
+    if (typeof field.autoIncrement !== 'undefined' && field.autoIncrement !== convertType) return false
+
     return true
   }
 }
+
+// for (let i = 0; i < schemaKeys.length; i++) {
+//   switch (schemaKeys[i]) {
+//     case 'Type':
+//       convertType = this.createSQL.convertType(field.type, field?.size)
+//       if (this.createSQL.possibleStringTypes.includes(convertType.toUpperCase())) {
+//         if (convertType === 'varchar' && testField.Type.includes('varchar')) {
+//           let type = testField.Type.split('(')[0]
+//           let size = testField.Type.split('(')[1].split(')')[0]
+//           if (type && size) {
+//             if (typeof field.size === 'undefined' || type !== convertType || size !== String(field.size)) return false
+//           }
+//         } else {
+//           if (testField.Type !== convertType) return false
+//         }
+//       } else if (typeof field.type !== 'undefined' && testField.Type !== convertType) return false
+//       break
+//     case 'Null':
+//       convertType = testField.Null === 'NO' ? false : true
+//       if (typeof field.nullable !== 'undefined' && convertType !== field.nullable) return false
+//       break
+//     case 'Key':
+//       convertType = testField.Key === 'PRI' ? 'primary' : 'foreign'
+//       if (typeof field.key !== 'undefined' && convertType !== field.key) return false
+//       break
+//     case 'Default':
+//       if (typeof field.default !== 'undefined' && field.default !== testField.Default) return false
+//       break
+//     case 'Extra':
+//       convertType = testField.Extra === 'auto_increment' ? true : false
+//       if (typeof field.autoIncrement !== 'undefined' && field.autoIncrement !== convertType) return false
+//   }
+// }

@@ -53,7 +53,7 @@ export default class NIDB {
       try {
         this.databaseConnections = {
           ...this.databaseConnections,
-          [`${connectionName}`]: new connection(connectionName, databaseType, connectionConfig, additionalConfig),
+          [connectionName]: new connection(connectionName, databaseType, connectionConfig, additionalConfig),
         }
 
         let res = await this.databaseConnections[connectionName].connectDB()
