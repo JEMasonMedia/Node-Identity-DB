@@ -48,10 +48,9 @@ let res
 // })
 // console.log('items', res)
 
-// does not work yet
+// usable state needs work
 res = await dbConnections.queryBuilder().alterTable({
-  whichConnection: 'items',
-  modelName: 'items',
+  model: 'items.items',
   preserveData: false,
 })
 console.log('items', res)
@@ -127,6 +126,14 @@ await dbConnections.closeConnections(null, (err, dbList) => {
 //     newFieldName: 'name',
 //   }
 // )
+// console.log('items', res)
+
+// usable state needs work
+// res = await dbConnections.queryBuilder().alterTable({
+//   whichConnection: 'items',
+//   modelName: 'items',
+//   preserveData: false,
+// })
 // console.log('items', res)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

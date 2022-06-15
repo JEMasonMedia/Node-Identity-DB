@@ -84,9 +84,9 @@ export default class MySql2DBManager extends MySql2DBTranslator {
       const res = (await dbConn.connection.promise().query(this.translator.getTableSchemaQuery(model.modelName)))[0]
       const schema = this.convertSchema(model.modelName, res)
       const { add, drop, modify } = this.translator.compareSchema(schema, model)
-      console.log('add', add)
-      console.log('drop', drop)
-      console.log('modify', modify)
+      // console.log('add', add)
+      // console.log('drop', drop)
+      // console.log('modify', modify)
 
       if (add.length > 0) {
         await dbConn.connection.promise().query(this.translator.getAddColumnsQuery(model, add))
