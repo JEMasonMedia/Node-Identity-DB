@@ -43,7 +43,11 @@ let res
 
 res = await dbConnections.queryBuilder().raw({
   model: 'users.users',
-  query: [{ city: 'London' }, { first_name: 1, _id: 0 }],
+  query: {
+    findOne: { _id: 2 },
+    // project: { first_name: 1, _id: 0 },
+    // toArray: true,
+  },
 })
 console.log('users\n', res)
 

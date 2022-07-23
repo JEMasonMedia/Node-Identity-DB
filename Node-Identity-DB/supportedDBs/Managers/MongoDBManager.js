@@ -40,14 +40,23 @@ export default class MongoDBManager {
   }
 
   raw = async modelArgs => {
-    let res = await this.connection
-      .db()
-      .collection(modelArgs.modelName)
-      // .find(...modelArgs.query)
-      .find(modelArgs.query[0])
-      .project(modelArgs.query[1])
-    // console.log(this.connection.db().collection(modelArgs.modelName).find())
-    return res.toArray()
+    try {
+      const method = Object.keys(modelArgs.query)[0]
+      if (!this.#methods.includes(method)) throw new Error('Invalid method')
+      let query = modelArgs.query[method]
+
+      const project = modelArgs.query.project && modelArgs.query.project
+      const sort = modelArgs.query.sort && modelArgs.query.sort
+      const limit = (modelArgs.query.limit && modelArgs.query.limit) || 0
+      const skip = (modelArgs.query.skip && modelArgs.query.skip) || 0
+      const collection = this.connection.db().collection(modelArgs.modelName)
+
+      let result = await collection[method](query)?.project(project)?.sort(sort)?.limit(limit)?.skip(skip)?.toArray()
+
+      return result
+    } catch (err) {
+      return { err }
+    }
   }
 
   tableExists = async model => {
@@ -126,5 +135,118 @@ export default class MongoDBManager {
     } catch (err) {
       return { err }
     }
+  }
+
+  #methods = ['aggregate', 'bulkWrite', 'count', 'countDocuments', 'createIndex', 'createIndexes', 'dataSize', 'deleteOne', 'deleteMany', 'distinct', 'drop', 'dropIndex', 'dropIndexes', 'estimatedDocumentCount', 'explain', 'find', 'findAndModify', 'findOne', 'findOneAndDelete', 'findOneAndReplace', 'findOneAndUpdate', 'getIndexes', 'getShardDistribution', 'getShardVersion', 'hideIndex', 'insertOne', 'insertMany', 'isCapped', 'latencyStats', 'mapReduce', 'reIndex', 'remove', 'renameCollection', 'replaceOne', 'stats', 'storageSize', 'totalIndexSize', 'totalSize', 'unhideIndex', 'updateOne', 'updateMany', 'watch', 'validate']
+
+  #methodFunctions = {
+    aggregate: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).aggregate(query).toArray()
+    },
+    bulkWrite: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).bulkWrite(query)
+    },
+    count: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).count(query)
+    },
+    countDocuments: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).countDocuments(query)
+    },
+    createIndex: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).createIndex(query)
+    },
+    createIndexes: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).createIndexes(query)
+    },
+    dataSize: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).dataSize(query)
+    },
+    deleteOne: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).deleteOne(query)
+    },
+    deleteMany: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).deleteMany(query)
+    },
+    distinct: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).distinct(query)
+    },
+    drop: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).drop(query)
+    },
+    dropIndex: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).dropIndex(query)
+    },
+    dropIndexes: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).dropIndexes(query)
+    },
+    estimatedDocumentCount: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).estimatedDocumentCount(query)
+    },
+    explain: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).explain(query)
+    },
+    find: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).find(query)
+    },
+    findAndModify: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).findAndModify(query)
+    },
+    findOne: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).findOne(query)
+    },
+    findOneAndDelete: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).findOneAndDelete(query)
+    },
+    findOneAndReplace: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).findOneAndReplace(query)
+    },
+    findOneAndUpdate: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).findOneAndUpdate(query)
+    },
+    createIndexes: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).createIndexes(query)
+    },
+    insertMany: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).insertMany(query)
+    },
+    insertOne: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).insertOne(query)
+    },
+    isCapped: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).isCapped(query)
+    },
+    listIndexes: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).listIndexes(query)
+    },
+    mapReduce: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).mapReduce(query)
+    },
+    reIndex: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).reIndex(query)
+    },
+    remove: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).remove(query)
+    },
+    renameCollection: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).renameCollection(query)
+    },
+    replaceOne: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).replaceOne(query)
+    },
+    stats: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).stats(query)
+    },
+    updateMany: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).updateMany(query)
+    },
+    updateOne: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).updateOne(query)
+    },
+    watch: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).watch(query)
+    },
+    validate: async (modelName, query) => {
+      return await this.connection.db().collection(modelName).validate(query)
+    },
   }
 }
