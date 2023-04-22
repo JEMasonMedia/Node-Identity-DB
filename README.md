@@ -1,5 +1,11 @@
 # Node-Identity-DB
 
+This Dev branch is a complete rewrite into typescript and a restructuring of the project. The master branch will eventually be updated to this new version. Neither is fit for use at this time.
+
+The new version is essentially a rewrite to a model based system similar to Mongoose, but with the ability to use any database type and possibly APIs. I haven't updated this project in many months as I have been planning this new attack to the problem. I'm hoping to have a working version in the next few months.
+
+# Node-Identity-DB
+
 Node-Identity-DB is a library to allow Node-Identity the ability to easily connect to any of the major database types, both SQL and Non-SQL. It uses mostly established and trusted libraries for each of the database types, such as Mongoose, Mysql, and PG and others, but it will have some unique tricks of it's own when used separately from Node-Identity. Imagine relational functionality with MongoDB and with the very same app, using the same models to work with SqlServer, or Mysql. I'm sure you can imagine how useful such could be for a lot of applications.
 
 ## Purpose

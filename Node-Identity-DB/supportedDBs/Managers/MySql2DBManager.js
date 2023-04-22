@@ -2,7 +2,7 @@ import mysql from 'mysql2/promise'
 import knex from 'knex'
 import MySql2DBTranslator from '../Translators/MySql2DBTranslator.js'
 
-export default class MySql2DBManager extends MySql2DBTranslator {
+export default class MySql2DBManager {
   dbType = 'MYSQLDB'
   translator = new MySql2DBTranslator()
   connection = null

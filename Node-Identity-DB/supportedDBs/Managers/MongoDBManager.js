@@ -51,7 +51,9 @@ export default class MongoDBManager {
       const skip = (modelArgs.query.skip && modelArgs.query.skip) || 0
       const collection = this.connection.db().collection(modelArgs.modelName)
 
-      let result = await collection[method](query)?.project(project)?.sort(sort)?.limit(limit)?.skip(skip)?.toArray()
+      // console.log(collection)
+      // let result = await collection[method](query)?.project(project)?.sort(sort)?.limit(limit)?.skip(skip)?.toArray()
+      let result = await collection[method](query)
 
       return result
     } catch (err) {
