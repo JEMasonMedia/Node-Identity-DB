@@ -25,6 +25,7 @@
  *    * Closes all or specified database connections
  */
 
+/*
 import helpers from './helpers/helpers.js'
 import queryBuilder from './queryBuilders/queryBuilder.js'
 import connection from './dbConnections/connection.js'
@@ -205,3 +206,4 @@ export default class NIDB {
     }
   }
 }
+*/
