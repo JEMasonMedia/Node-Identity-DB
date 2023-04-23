@@ -96,3 +96,18 @@ export default {
     }
   },
 }
+
+// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// const model = {
+//   user: {
+//     _id: {
+//       key: 'primary',
+//       type: 'number',
+//       size: 255,
+//       unique: true,
+//       nullable: false,
+//       autoIncrement: true,
+//       defaultValue: MAX_VALUE,
+//     },
+//   }
+// }
